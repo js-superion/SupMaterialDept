@@ -17,7 +17,7 @@ import mx.controls.DateField;
 import mx.core.IFlexDisplayObject;
 import mx.managers.PopUpManager;
 
-//服务类
+//服务类4
 public const DESTINATION:String='deptCheckListImpl';
 private const MENU_NO:String="0405";
 public 	var dict:Dictionary=new Dictionary();
