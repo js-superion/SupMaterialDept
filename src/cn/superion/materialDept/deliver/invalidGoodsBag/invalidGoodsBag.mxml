@@ -1,0 +1,714 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Module xmlns:fx="http://ns.adobe.com/mxml/2009"
+		   xmlns:s="library://ns.adobe.com/flex/spark"
+		   xmlns:mx="library://ns.adobe.com/flex/mx"
+		   layout="absolute"
+		   width="100%"
+		   height="100%"
+		   creationComplete="doInit(event)"
+		   xmlns:util="cn.superion.materialDept.util.*"
+		   xmlns:controls="cn.superion.base.components.controls.*">
+	<fx:Script>
+		<![CDATA[
+			import cn.superion.base.config.AppInfo;
+			import cn.superion.base.config.BaseDict;
+			import cn.superion.base.config.ParameterObject;
+			import cn.superion.base.util.ArrayCollUtils;
+			import cn.superion.base.util.FormUtils;
+			import cn.superion.base.util.ObjectUtils;
+			import cn.superion.base.util.PurviewUtil;
+			import cn.superion.base.util.RemoteUtil;
+			import cn.superion.materialDept.deliver.invalidGoodsBag.view.invalidGoodsBagQuery;
+			import cn.superion.materialDept.util.DefaultPage;
+			import cn.superion.materialDept.util.MaterialDictShower;
+			import cn.superion.vo.cssd.CssdStockMaster;
+			import cn.superion.vo.material.MaterialPatsDetail;
+			import cn.superion.vo.material.MaterialPatsMaster;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.IFlexDisplayObject;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ListEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.remoting.RemoteObject;
+			
+			import spark.events.TextOperationEvent;
+			private static const MENU_NO:String="0206";
+			public var DESTANATION:String="deptPatsFeeImpl";
+			public var inpNos:String='';
+			public var zParameter:Object={};
+			//查询主记录ID列表
+			public var arrayAutoId:ArrayCollection=new ArrayCollection();
+			//当前页，翻页用
+			public var currentPage:int=0;
+			protected function doInit(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				parentDocument.title="病人用包登记";
+
+				//重新注册客户端对应的服务端类
+				registerClassAlias("cn.superion.materialDept.entity.MaterialPatsMaster", MaterialPatsMaster);
+				registerClassAlias("cn.superion.materialDept.entity.MaterialPatsDetail", MaterialPatsDetail);
+				//放大镜不可手动输入
+				preventDefaultForm();
+				preventDefaultForm();
+				initToolBar();
+			}
+
+			/**
+			 * 表头设置只读或读写状态
+			 */
+			private function setReadOnly(boolean:Boolean):void
+			{
+				one.enabled=boolean;
+			}
+
+			/**
+			 * 阻止放大镜表格输入内容
+			 */
+			private function preventDefaultForm():void
+			{
+				materialCode.txtContent.addEventListener(TextOperationEvent.CHANGING, function(e:TextOperationEvent):void
+					{
+						e.preventDefault();
+					})
+			}
+
+			/**
+			 * 初始化工具栏
+			 * */
+			private function initToolBar():void
+			{
+				var laryDisplays:Array=[toolBar.btPrint, toolBar.imageList4, toolBar.btExp, toolBar.btDelRow, toolBar.imageList1, toolBar.btAdd, toolBar.btModify, toolBar.btCancel, toolBar.btSave, toolBar.btVerify, toolBar.imageList2, toolBar.btQuery, toolBar.imageList5, toolBar.btFirstPage, toolBar.btPrePage, toolBar.btNextPage, toolBar.btLastPage, toolBar.imageList6, toolBar.btExit];
+				var laryEnables:Array=[toolBar.btAdd, toolBar.btQuery, toolBar.btExit];
+				ToolBar.showSpecialBtn(toolBar, laryDisplays, laryEnables, true);
+			}
+
+			/**
+			 * 按照住院号 查病人详细信息
+			 */
+			protected function inpNo_keyUpHandler(event:KeyboardEvent):void
+			{
+				// TODO Auto-generated method stub
+				if (event.keyCode == Keyboard.ENTER)
+				{
+					if (dataGridDetail.dataProvider.length > 0)
+					{
+						Alert.show("您确定更换病人吗？", "提示", Alert.YES | Alert.NO, null, function(e:CloseEvent):void
+							{
+								if (e.detail == Alert.NO)
+								{
+									return;
+								} 
+								//清空当前表单
+								clearForm(true, true);
+								fildinpNo(inpNo.text);
+							})
+					}
+					else
+					{
+						fildinpNo(inpNo.text);
+					}
+				}
+			}
+// 编写病人领包登记模块、新增、删除、修改、审核、查询、后台前台代码。 
+			/**
+			 * 病人详细信息
+			 */
+			public function fildinpNo(inp:String):void
+			{
+				var ro:RemoteObject=RemoteUtil.getRemoteObject("agentMaterialUsedImpl", function(rev:Object):void
+					{
+						if (rev.data[0] == null)
+						{
+							//清空当前表单
+							inpNos="";
+							clearForm(true, true);
+							return;
+						}
+						inpNos=rev.data[0].inpNo;
+						FormUtils.fillFormByItem(patsMaster, rev.data[0]);
+						materialCode.txtContent.setFocus();
+					});
+				ro.findByPatientId(inp);
+			}
+
+			/**
+			 * 给主记录赋值
+			 */
+			protected function masterEvaluate(rev:Object):void
+			{
+				diagnoseName.text=rev.data[0].diagnoseName == null ? rev.data[0].clinicDiagName : rev.data[0].diagnoseName;
+				var aplyDoctor:String=rev.data[0].doctorInCharge == null ? rev.data[0].applyDoctor : rev.data[0].doctorInCharge;
+				var consultingDoctor1:Object=ArrayCollUtils.findItemInArrayByValue(BaseDict.personIdDict, 'personId', aplyDoctor);
+				var deptcode:Object=ArrayCollUtils.findItemInArrayByValue(BaseDict.deptDict, 'dept', rev.data[0].deptCode);
+				var wardcode:Object=ArrayCollUtils.findItemInArrayByValue(BaseDict.deptDict, 'dept', rev.data[0].wardCode);
+				consultingDoctor.text=consultingDoctor1 == null ? null : consultingDoctor1.personIdName;
+				deptCode.text=deptcode == null ? null : deptcode.deptName;
+				wardCode.text=wardcode == null ? null : wardcode.deptName;
+				patientName.text=rev.data[0].personName == null ? patientName.text : rev.data[0].personName;
+			}
+
+			/**
+			 * 清空表单
+			 */
+			public function clearForm(masterFlag:Boolean, detailFlag:Boolean):void
+			{
+				if (masterFlag)
+				{
+					//清空主记录
+					clearMaster();
+				}
+				if (detailFlag)
+				{
+					//清空明细
+					clearDetail();
+				}
+			}
+
+			/**
+			 * 清空明细
+			 */
+			private function clearDetail():void
+			{
+				FormUtils.clearForm(patsDetail);
+			}
+
+			/**
+			 * 清空主记录
+			 */
+			public function clearMaster():void
+			{
+				FormUtils.clearForm(patsMaster);
+				dataGridDetail.dataProvider=null;
+			}
+
+			/**
+			 * 转换人名
+			 */
+			protected function codeToName(name:String):String
+			{
+				var makerItem:Object=ArrayCollUtils.findItemInArrayByValue(BaseDict.personIdDict, 'personId', name);
+				var maker:String=makerItem == null ? "" : makerItem.personIdName;
+				return maker;
+			}
+
+			/**
+			 * 过滤物品包
+			 */
+			protected function materialCode_queryIconClickHandler(event:Event):void
+			{
+//				var materialCode:String=materialCode.text;
+				// TODO Auto-generated method stub
+				if (inpNos == null || inpNos == "")
+				{
+					inpNo.setFocus();
+					Alert.show("请先填写病人信息!", "提示");
+					return;
+				}
+				var x:int=0;
+				var y:int=this.parentApplication.screen.height - 338;
+				MaterialDictShower.showCssdPackageDictChooser(function(faryItems:Object):void
+					{
+						var ro:RemoteObject=RemoteUtil.getRemoteObject("cssdDeliverImpl", function(rev:Object):void
+							{
+								if (rev.data.length <= 0)
+								{
+									return
+								}
+								var cssdStockMater:CssdStockMaster=new CssdStockMaster();
+
+								ObjectUtils.mergeObject(rev.data[0], cssdStockMater);
+								var arry:ArrayCollection=new ArrayCollection();
+								arry=dataGridDetail.dataProvider as ArrayCollection;
+								for each (var o:Object in arry)
+								{
+									if (o.packageNo == cssdStockMater.packageNo)
+									{
+										materialCode.txtContent.setFocus();
+										Alert.show("不能重复使用一种包!", "提示");
+										return;
+									}
+								}
+								cssdStockMater.registerStatus='1';
+								cssdStockMater.inpNo=inpNos;
+								cssdStockMater.registeDate=new Date;
+								cssdStockMater.register=AppInfo.currentUserInfo.userCode;
+								FormUtils.fillFormByItem(patsDetail, cssdStockMater);
+								arry.addItem(cssdStockMater);
+								dataGridDetail.dataProvider=arry;
+								dataGridDetail.selectedIndex=(dataGridDetail.dataProvider.length) - 1;
+							});
+						ro.findProvideListByPackageId(faryItems.packageId, AppInfo.currentUserInfo.deptCode);
+
+					}, x, y);
+			}
+
+			protected function dataGridDetail_itemClickHandler(event:ListEvent):void
+			{
+				// TODO Auto-generated method stub
+				FormUtils.fillFormByItem(patsDetail, dataGridDetail.selectedItem);
+			}
+
+
+			/**
+			 * 增加
+			 */
+			protected function toolBar_addClickHandler(event:Event):void
+			{
+				//新增权限
+				if (!checkUserRole('01'))
+				{
+					return;
+				}
+				//增加按钮
+				toolBar.addToPreState()
+				//设置可写
+				setReadOnly(true);
+				//清空当前表单
+				clearForm(true, true);
+				inpNo.setFocus();
+
+			}
+
+			/**
+			 * 当前角色权限认证
+			 */
+			public static function checkUserRole(role:String):Boolean
+			{
+				//判断具有操作权限  -- 应用程序编号，菜单编号，权限编号
+				// 01：增加                02：修改            03：删除
+				// 04：保存                05：打印            06：审核
+				// 07：弃审                08：输出            09：输入
+				if (!PurviewUtil.getPurview(AppInfo.APP_CODE, MENU_NO, role))
+				{
+					Alert.show("您无此按钮操作权限！", "提示");
+					return false;
+				}
+				return true;
+			}
+
+			protected function toolBar_cancelClickHandler(event:Event):void
+			{
+				// TODO Auto-generated method stub
+				Alert.show("您是否放弃当前操作吗？", "提示", Alert.YES | Alert.NO, null, function(e:CloseEvent):void
+					{
+						if (e.detail == Alert.NO)
+						{
+							return;
+						}
+						//清空当前表单
+						clearForm(true, true);
+						//按钮状态
+						initToolBar();
+						//设置文本不可编辑
+						setReadOnly(false);
+					})
+			}
+
+			/**
+			 * 退出
+			 */
+			protected function exitClickHandler(event:Event):void
+			{
+				PopUpManager.removePopUp(this.parentDocument as IFlexDisplayObject);
+				DefaultPage.gotoDefaultPage();
+			}
+
+			/**
+			 * 删行
+			 */
+			protected function delRowClickHandler(event:Event):void
+			{
+				//光标所在位置
+				var listay:ArrayCollection=new ArrayCollection();
+				var cssdStockMater:CssdStockMaster=new CssdStockMaster();
+				ObjectUtils.mergeObject(dataGridDetail.selectedItem, cssdStockMater);
+				var laryDetails:ArrayCollection=dataGridDetail.dataProvider as ArrayCollection;
+				var i:int=laryDetails.getItemIndex(dataGridDetail.selectedItem);
+				if (i < 0)
+				{
+					return
+				}
+				cssdStockMater.inpNo="";
+				cssdStockMater.registeDate=null;
+				cssdStockMater.register="";
+				listay.addItem(cssdStockMater);
+				Alert.show("您是否删除吗？", "提示", Alert.YES | Alert.NO, null, function(e:CloseEvent):void
+					{
+						if (e.detail == Alert.NO)
+						{
+							return;
+						}
+						var ro:RemoteObject=RemoteUtil.getRemoteObject("cssdDeliverImpl", function(rev:Object):void
+						{
+							
+						});
+						ro.verifyInpNo(listay,"0");
+						clearDetail();
+						laryDetails.removeItemAt(i);
+						dataGridDetail.dataProvider=laryDetails;
+						dataGridDetail.invalidateList();
+						dataGridDetail.selectedIndex=dataGridDetail.dataProvider.length - 1;
+						dataGridDetail.selectedIndex=i == 0 ? 0 : (i - 1);
+						FormUtils.fillFormByItem(patsDetail, dataGridDetail.selectedItem);
+					})
+			}
+
+			/**
+			 * 保存
+			 */
+			protected function toolBar_saveClickHandler(event:Event):void
+			{
+				// TODO Auto-generated method stub
+				if (patientName.text == null || patientName.text == "")
+				{
+					inpNo.setFocus();
+					Alert.show("请填写病人信息!", "提示");
+					return;
+				}
+				if (inpNos == null || inpNos == "")
+				{
+					inpNo.setFocus();
+					Alert.show("请填写病人信息!", "提示");
+					return;
+				}
+				if (dataGridDetail.dataProvider.length <= 0)
+				{
+					materialCode.txtContent.setFocus();
+					Alert.show("请填写发放包", "提示");
+					return;
+				}
+
+				var arryList:ArrayCollection=dataGridDetail.dataProvider as ArrayCollection;
+				var ro:RemoteObject=RemoteUtil.getRemoteObject("cssdDeliverImpl", function(rev:Object):void
+					{
+						initToolBar();
+						setReadOnly(false);
+						statuInpNo(true);
+						Alert.show("保存成功!", "提示");
+					});
+				ro.saveRegister(arryList);
+			}
+
+			protected function materialCode_keyDownHandler(event:KeyboardEvent):void
+			{
+				// TODO Auto-generated method stub
+				if (event.keyCode == Keyboard.ENTER)
+				{
+					materialCode_queryIconClickHandler(event);
+				}
+			}
+
+
+			protected function toolBar_queryClickHandler(event:Event):void
+			{
+				// TODO Auto-generated method stub
+				var queryWin:invalidGoodsBagQuery=PopUpManager.createPopUp(this, invalidGoodsBagQuery, true) as invalidGoodsBagQuery;
+				queryWin.data={parentWin: this};
+				PopUpManager.centerPopUp(queryWin);
+			}
+			
+			/**
+			 * 首页
+			 */
+			protected function firstPageClickHandler(event:Event):void
+			{
+				//定位到数组第一个
+				if (arrayAutoId.length < 1)
+				{
+					return;
+				}
+				currentPage=0;
+				var strAutoId:String=arrayAutoId[currentPage] as String;
+				findRdsById(strAutoId);
+				
+				toolBar.firstPageToPreState()
+			}
+			
+			/**
+			 * 下一页
+			 */
+			protected function nextPageClickHandler(event:Event):void
+			{
+				if (arrayAutoId.length < 1)
+				{
+					return;
+				}
+				currentPage++;
+				if (currentPage >= arrayAutoId.length)
+				{
+					currentPage=arrayAutoId.length - 1;
+				}
+				
+				var strAutoId:String=arrayAutoId[currentPage] as String;
+				findRdsById(strAutoId);
+				
+				toolBar.nextPageToPreState(currentPage, arrayAutoId.length - 1);
+			}
+			
+			/**
+			 * 上一页
+			 */
+			protected function prePageClickHandler(event:Event):void
+			{
+				if (arrayAutoId.length < 1)
+				{
+					return;
+				}
+				currentPage--;
+				if (currentPage <= 0)
+				{
+					currentPage=0;
+				}
+				
+				var strAutoId:String=arrayAutoId[currentPage] as String;
+				findRdsById(strAutoId);
+				
+				toolBar.prePageToPreState(currentPage);
+			}
+			
+			/**
+			 * 末页
+			 */
+			protected function lastPageClickHandler(event:Event):void
+			{
+				if (arrayAutoId.length < 1)
+				{
+					return;
+				}
+				currentPage=arrayAutoId.length - 1;
+				
+				var strAutoId:String=arrayAutoId[currentPage] as String;
+				findRdsById(strAutoId);
+				
+				toolBar.lastPageToPreState();
+			}
+
+			/**
+			 * 翻页调用此函数
+			 * */
+			public function findRdsById(inpNo:String):void
+			{
+				var para:ParameterObject=new ParameterObject();
+				zParameter["inpNo"]=inpNo;
+				para.conditions=zParameter;
+				fildinpNo(inpNo);
+				var ro:RemoteObject=RemoteUtil.getRemoteObject("cssdDeliverImpl", function(rev:Object):void
+				{
+					var sta:Boolean=true;
+					dataGridDetail.dataProvider=rev.data;
+					if(rev.data[0].registerStatus=='2')
+					{
+						sta=false;
+					}
+					statuInpNo(sta);
+				});
+				ro.findStockMasterInpNo(para);
+			}
+
+			public function statuInpNo(bool:Boolean):void
+			{
+				toolBar.btModify.enabled=bool;
+				toolBar.btCancel.enabled=false;
+				toolBar.btVerify.enabled=bool;
+				toolBar.btAdd.enabled=true;
+				toolBar.btDelete.enabled=bool;
+			}
+			
+			/**
+			 * 审核
+			 */ 
+			protected function toolBar_verifyClickHandler(event:Event):void
+			{
+				// TODO Auto-generated method stub
+				var ro:RemoteObject=RemoteUtil.getRemoteObject("cssdDeliverImpl", function(rev:Object):void
+				{
+					dataGridDetail.dataProvider=rev.data;
+					statuInpNo(false);
+				});
+				ro.verifyInpNo(dataGridDetail.dataProvider as ArrayCollection,"2");
+				
+			}
+
+			/**
+			 * 修改
+			 */ 
+			protected function toolBar_modifyClickHandler(event:Event):void
+			{
+				// TODO Auto-generated method stub
+				toolBar.modifyToPreState();
+				//设置可写
+				setReadOnly(true);
+			}
+
+
+
+		]]>
+	</fx:Script>
+
+	<s:BorderContainer width="100%"
+					   height="100%"
+					   backgroundColor="0xE2E8E8">
+		<s:VGroup width="100%"
+				  height="100%"
+				  gap="0">
+			<util:ToolBar id="toolBar"
+						  width="100%"
+						  addClick="toolBar_addClickHandler(event)"
+						  saveClick="toolBar_saveClickHandler(event)"
+						  cancelClick="toolBar_cancelClickHandler(event)"
+						  delRowClick="delRowClickHandler(event)"
+						  exitClick="exitClickHandler(event)"
+						  queryClick="toolBar_queryClickHandler(event)"
+						  verifyClick="toolBar_verifyClickHandler(event)"
+						  modifyClick="toolBar_modifyClickHandler(event)"/>
+			<controls:BarSubTitle title="病人用包登记"/>
+			<s:BorderContainer width="100%"
+							   height="100%"
+							   backgroundColor="0xE2E8E8"
+							   borderColor="#9ABBE6">
+				<s:VGroup width="100%"
+						  height="100%"
+						  paddingLeft="5"
+						  paddingBottom="5"
+						  paddingRight="5"
+						  paddingTop="5">
+					<s:VGroup id="one"
+							  width="100%"
+							  enabled="false">
+
+
+						<s:VGroup id="patsMaster"
+								  width="100%">
+							<s:HGroup width="100%"
+									  height="50%"
+									  verticalAlign="middle">
+								<s:Label text="住 院 号"
+										 color="blue"/>
+								<s:TextInput id="inpNo"
+											 keyDown="inpNo_keyUpHandler(event)"/>
+								<s:Label text="病人姓名"/>
+								<s:TextInput id="patientName"
+											 editable="false"/>
+								<s:Label text="病人性别"/>
+								<s:TextInput id="sex"
+											 editable="false"/>
+								<s:Label text="年龄"/>
+								<s:TextInput id="age"
+											 restrict="0-9"
+											 editable="false"/>
+								<s:Label text="费别"/>
+								<s:TextInput id="chargeType"
+											 editable="false"/>
+								<s:Label text="床号"/>
+								<s:TextInput id="bedNo"
+											 width="100%"
+											 editable="false"/>
+							</s:HGroup>
+							<s:HGroup width="100%"
+									  height="50%"
+									  verticalAlign="middle">
+								<s:Label text="科    室"/>
+								<s:TextInput id="deptCode"
+											 width="{inpNo.width}"
+											 editable="false"/>
+								<s:Label text="所属病区"/>
+								<s:TextInput id="wardCode"
+											 width="{patientName.width}"
+											 editable="false"/>
+								<s:Label text="申请医生"/>
+								<s:TextInput id="consultingDoctor"
+											 width="{sex.width}"
+											 editable="false"/>
+								<s:Label text="诊断"/>
+								<s:TextInput id="diagnoseName"
+											 width="100%"
+											 editable="false"/>
+								<s:Label text="余额"/>
+								<s:TextInput id="prepaymentsLeft"
+											 width="{bedNo.width}"
+											 textAlign="right"
+											 editable="false"
+											 text="{(Number(prepaymentsLeft.text)).toFixed(2)}"
+											 restrict="0-9"/>
+							</s:HGroup>
+						</s:VGroup>
+						<s:VGroup id="patsDetail"
+								  width="100%">
+							<mx:HRule width="100%"/>
+							<s:HGroup width="100%"
+									  height="50%"
+									  verticalAlign="middle">
+								<s:Label id="txPhoLabel"
+										 text="拼音简码"
+										 color="blue"/>
+								<controls:TextInputIcon id="materialCode"
+														width="{deptCode.width}"
+														keyDown="materialCode_keyDownHandler(event)"
+														queryIconClick="materialCode_queryIconClickHandler(event)"/>
+								<s:Label text="物品包分"/>
+								<s:TextInput id="packageClass"
+											 enabled="false"
+											 width="{wardCode.width}"/>
+								<s:Label text="物品包名"/>
+								<s:TextInput id="packageName"
+											 width="{consultingDoctor.width}"
+											 enabled="false"/>
+								<s:Label text="包装方式"/>
+								<s:TextInput id="packageSpec"
+											 width="{age.width}"
+											 enabled="false"/>
+								<s:Label text="单位"/>
+								<s:TextInput id="packageUnits"
+											 width="{chargeType.width}"
+											 enabled="false"/>
+								<s:Label text="条形码"/>
+								<s:TextInput id="packageNo"
+											 width="100%"
+											 enabled="false"/>
+							</s:HGroup>
+						</s:VGroup>
+					</s:VGroup>
+					<controls:SuperDataGrid id="dataGridDetail"
+											width="100%"
+											height="100%"
+											hasRowNo="true"
+											styleName="dataGrid"
+											format="{[,,,,,,'0.00','0.00',,]}"
+											horizontalScrollPolicy="auto"
+											itemClick="dataGridDetail_itemClickHandler(event)">
+						<controls:columns>
+							<mx:DataGridColumn headerText="序号"
+											   width="50"
+											   editable="false"
+											   textAlign="left"/>
+							<mx:DataGridColumn dataField="packageNo"
+											   headerText="条形码"
+											   width="200"
+											   editable="false"
+											   textAlign="left"/>
+							<mx:DataGridColumn dataField="packageName"
+											   headerText="包名称"
+											   width="360"
+											   editable="false"
+											   textAlign="left"/>
+							<mx:DataGridColumn dataField="packageSpec"
+											   headerText="规格型号"
+											   width="200"
+											   editable="false"
+											   textAlign="left"/>
+							<mx:DataGridColumn dataField="packageUnits"
+											   headerText="单位"
+											   width="60"
+											   editable="false"
+											   textAlign="left"/>
+						</controls:columns>
+					</controls:SuperDataGrid>
+				</s:VGroup>
+			</s:BorderContainer>
+		</s:VGroup>
+	</s:BorderContainer>
+</mx:Module>

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	 盘点单据列表模块
+	 author: 芮玉红  2011.02.22
+-->
+<mx:Module xmlns:fx="http://ns.adobe.com/mxml/2009"
+		   xmlns:s="library://ns.adobe.com/flex/spark"
+		   xmlns:mx="library://ns.adobe.com/flex/mx"
+		   layout="vertical"
+		   height="100%"
+		   width="100%"
+		   horizontalScrollPolicy="auto"
+		   xmlns:controls="cn.superion.base.components.controls.*"
+		   creationComplete="doInit()"
+		   xmlns:view="cn.superion.materialDept.util.*">
+
+	<fx:Script source="ModCheckListas.as"/>
+
+	<s:BorderContainer width="100%"
+					   height="100%"
+					   backgroundColor="0xE2E8E8"
+					   borderVisible="false">
+		<s:Scroller width="100%"
+					height="100%">
+			<s:VGroup id="vg"
+					  gap="0"
+					  height="100%"
+					  width="100%">
+				<view:ToolBar id="toolBar"
+							  width="100%"
+							  printClick="printClickHandler(event)"
+							  expClick="expClickHandler(event)"
+							  queryClick="queryClickHandler(event)"
+							  exitClick="exitClickHandler(event)"/>
+
+				<controls:BarSubTitle title="盘点单据列表"/>
+
+				<controls:PageGrid id="dgCheckList"
+								   hasRowNo="true"
+								   width="100%"
+								   height="100%"
+								   styleName="dataGrid"
+								   sumField="{['amount','counterMoney','checkAmount','pdMoney','profitAmount','profitCost']}"
+								   sumLableField="rowNo"
+								   format="{[,,,,,,,,,'0.00','0.00','0.00','0.00','0.00','0.00','0.00']}">
+					<controls:columns>
+						<mx:DataGridColumn headerText="序号"
+										   dataField="rowNo"
+										   width="50"
+										   textAlign="left"/>
+						<mx:DataGridColumn headerText="盘点编号"
+										   dataField="billNo"
+										   width="120"
+										   textAlign="left"/>
+						<mx:DataGridColumn headerText="盘点日期"
+										   dataField="billDate"
+										   width="90"
+										   textAlign="left"/>
+						<mx:DataGridColumn headerText="物资编码"
+										   dataField="materialCode"
+										   width="120"
+										   textAlign="left"/>
+						<mx:DataGridColumn headerText="物资名称"
+										   dataField="materialName"
+										   width="160"
+										   textAlign="left"/>
+						<mx:DataGridColumn headerText="规格型号"
+										   dataField="materialSpec"
+										   width="100"
+										   textAlign="left"/>
+						<mx:DataGridColumn headerText="单位"
+										   dataField="materialUnits"
+										   width="60"
+										   textAlign="left"/>
+						<mx:DataGridColumn headerText="生产厂家"
+										   dataField="factoryName"
+										   width="200"
+										   textAlign="right"/>
+						<mx:DataGridColumn headerText="有效期至"
+										   dataField="availDate"
+										   width="90"
+										   textAlign="right"/>
+						<mx:DataGridColumn headerText="售价"
+										   dataField="retailPrice"
+										   width="100"
+										   textAlign="right"/>
+						<mx:DataGridColumn headerText="账面数量"
+										   dataField="amount"
+										   width="80"
+										   textAlign="right"/>
+						<mx:DataGridColumn headerText="账面金额"
+										   dataField="counterMoney"
+										   width="100"
+										   textAlign="right"/>
+						<mx:DataGridColumn headerText="盘点数量"
+										   dataField="checkAmount"
+										   width="80"
+										   textAlign="right"/>
+						<mx:DataGridColumn headerText="盘点金额"
+										   dataField="pdMoney"
+										   width="100"
+										   textAlign="right"/>
+						<mx:DataGridColumn headerText="盈亏数量"
+										   dataField="profitAmount"
+										   width="80"
+										   textAlign="right"/>
+						<mx:DataGridColumn headerText="盈亏金额"
+										   dataField="profitCost"
+										   width="80"
+										   textAlign="right"/>
+						<mx:DataGridColumn headerText="备注"
+										   dataField="detailRemark"
+										   width="180"
+										   textAlign="left"/>
+					</controls:columns>
+				</controls:PageGrid>
+			</s:VGroup>
+		</s:Scroller>
+	</s:BorderContainer>
+</mx:Module>
+

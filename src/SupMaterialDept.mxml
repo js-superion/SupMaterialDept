@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:main="cn.superion.materialDept.main.*"
+			   minWidth="955"
+			   minHeight="600"
+			   creationComplete="inita(event)">
+	<fx:Style source="assets/css/myMain.css"/>
+	<fx:Script>
+		<![CDATA[
+			import cn.superion.base.config.AppInfo;
+			import cn.superion.dataDict.DictWinShower;
+			import cn.superion.materialDept.login.Login;
+			import cn.superion.materialDept.other.month.WinMonth;
+
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			import cn.superion.vo.material.MaterialRdsDetailDept;
+			import cn.superion.vo.material.MaterialRdsMasterDept;
+			public var timer:Timer;
+
+			protected function inita(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				AppInfo.APP_CODE="889";
+				AppInfo.APP_NAME="科室物资管理系统";
+				//是否开发模式	
+				AppInfo.APP_MODE=false;
+
+				var dictShower:DictWinShower=null;
+
+				//0 -- 小图标   1 -- 大图标
+				AppInfo.APP_MENU_STYLE="1";
+
+				ExternalInterface.call("setFlexFocus");
+				
+				this.pageTitle=AppInfo.APP_NAME;
+				var winMonth:WinMonth=new WinMonth();
+
+				var login:Login=Login(PopUpManager.createPopUp(this, Login, false))
+				PopUpManager.centerPopUp(login)
+
+				initTimer();
+			}
+
+			//获取初始值
+			private function initTimer():void
+			{
+				timer=new Timer(1000 * 50);
+				timer.addEventListener(TimerEvent.TIMER, function(e:TimerEvent):void
+				{
+					//getNoticeFromServer();
+				});
+			}
+		]]>
+	</fx:Script>
+
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<main:MainWin id="mainWin"
+				  x="0"
+				  y="0"
+				  visible="false">
+	</main:MainWin>
+</s:Application>

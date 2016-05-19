@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:controls="cn.superion.base.components.controls.*"
+			   width="400"
+			   height="390"
+			   creationComplete="doInit(event)"
+			   backgroundColor="0xE2E8E8"
+			   close="PopUpManager.removePopUp(this)"
+			   title="代销领用申请查询">
+	<fx:Script>
+		<![CDATA[
+			import cn.superion.base.components.controls.TextInputIcon;
+			import cn.superion.base.config.AppInfo;
+			import cn.superion.base.config.ParameterObject;
+			import cn.superion.base.util.RemoteUtil;
+			import cn.superion.materialDept.util.MaterialDictShower;
+
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.remoting.RemoteObject;
+			public var data:Object={};
+			public var destination:String="agentMaterialUsedImpl";
+			[Bindable]
+			private var currentStatusArray:ArrayCollection=new ArrayCollection([{currentStatus: '0', currentStatusName: '新增'}, {currentStatus: '1', currentStatusName: '审核'}, {currentStatus: '2', currentStatusName: '入库'}]);
+
+
+			//初始化
+			protected function doInit(event:FlexEvent):void
+			{
+				storageCode.dataProvider=AppInfo.currentUserInfo.storageList;
+			}
+
+			protected function btQuery_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub	
+				var parameter:Object={};
+				var para:ParameterObject=new ParameterObject();
+				parameter["storageCode"]=storageCode.selectedItem.storageCode;
+				parameter["beginBillNo"]=beginBillNo.text == "" ? null : beginBillNo.text;
+				parameter["endBillNo"]=endBillNo.text == "" ? null : endBillNo.text;
+				if (isBillDate.selected == true)
+				{
+					parameter["beginApplyDate"]=beginApplyDate.selectedDate;
+					parameter["endApplyDate"]=MaterialDictShower.addOneDay(endApplyDate.selectedDate);
+				}
+				parameter["patientId"]=patientId.text == "" ? null : patientId.text;
+				parameter["personName"]=personName.text == "" ? null : personName.text;
+				parameter["deptCode"]=deptCode.text == "" ? null : deptCode.text;
+				parameter["wardCode"]=wardCode.text == "" ? null : wardCode.text;
+				parameter["inpNo"]=inpNo.text == "" ? null : inpNo.text;
+				parameter["currentStatus"]=currentStatus.selectedItem.currentStatus;
+				para.conditions=parameter;
+				var ro:RemoteObject=RemoteUtil.getRemoteObject(destination, function(rev:Object):void
+					{
+						if (rev.data.length <= 0)
+						{
+							Alert.show("没有相关数据", "提示");
+							data.parentWin.doInit();
+							data.parentWin.clearForm(true, true);
+							btReturn_clickHandler();
+							return;
+						}
+						data.parentWin.arrayAutoId=ArrayCollection(rev.data).toArray();
+						data.parentWin.findRdsById(rev.data[0]);
+						setToolBarPageBts(rev.data.length);
+						btReturn_clickHandler();
+					});
+				ro.findApplyMasterListByCondition(para);
+			}
+
+			/**
+			 * 设置当前按钮是否显示
+			 */
+			private function setToolBarPageBts(flenth:int):void
+			{
+				data.parentWin.toolBar.queryToPreState()
+
+				if (flenth < 2)
+				{
+					data.parentWin.toolBar.btFirstPage.enabled=false
+					data.parentWin.toolBar.btPrePage.enabled=false
+					data.parentWin.toolBar.btNextPage.enabled=false
+					data.parentWin.toolBar.btLastPage.enabled=false
+					return;
+				}
+				data.parentWin.toolBar.btFirstPage.enabled=false
+				data.parentWin.toolBar.btPrePage.enabled=false
+				data.parentWin.toolBar.btNextPage.enabled=true
+				data.parentWin.toolBar.btLastPage.enabled=true
+			}
+
+			protected function textinput1_keyUpHandler(e:KeyboardEvent, fcontrolNext:*):void
+			{
+				// TODO Auto-generated method stub
+				//按回车跳转
+				if (e.keyCode == Keyboard.ENTER)
+				{
+					if (fcontrolNext is TextInputIcon && !(e.currentTarget is TextInputIcon))
+					{
+						fcontrolNext.txtContent.setFocus()
+						return;
+					}
+					if (e.currentTarget is TextInputIcon)
+					{
+						if (fcontrolNext is TextInputIcon)
+						{
+							fcontrolNext.txtContent.setFocus()
+							return;
+						}
+					}
+					if (fcontrolNext.className == "DateField")
+					{
+						fcontrolNext.open();
+						fcontrolNext.setFocus()
+						return;
+					}
+					if (fcontrolNext is DropDownList)
+					{
+						fcontrolNext.openDropDown();
+						fcontrolNext.setFocus();
+						return;
+					}
+					fcontrolNext.setFocus()
+				}
+			}
+
+			//关闭窗口
+			protected function btReturn_clickHandler():void
+			{
+				PopUpManager.removePopUp(this);
+			}
+		]]>
+	</fx:Script>
+	<s:layout>
+		<s:VerticalLayout paddingLeft="10"
+						  paddingRight="10"
+						  paddingTop="10"
+						  paddingBottom="10"/>
+	</s:layout>
+	<mx:TabNavigator width="100%"
+					 height="100%"
+					 paddingBottom="10"
+					 paddingTop="10"
+					 paddingLeft="10"
+					 paddingRight="10"
+					 backgroundColor="0xE2E8E8">
+		<s:NavigatorContent width="100%"
+							height="100%"
+							label="查询条件">
+			<s:VGroup width="100%"
+					  verticalAlign="middle"
+					  height="100%">
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<s:Label text="所在仓库"/>
+					<s:DropDownList id="storageCode"
+									width="100%"
+									height="25"
+									selectedIndex="0"
+									requireSelection="true"
+									labelField="storageName"/>
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+
+					<s:Label text="单据编号"/>
+					<s:TextInput id="beginBillNo"
+								 width="100%"
+								 keyUp="textinput1_keyUpHandler(event,endBillNo)"/>
+					<s:Label text="-"/>
+					<s:TextInput id="endBillNo"
+								 width="100%"
+								 keyUp="textinput1_keyUpHandler(event,isBillDate)"/>
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<s:CheckBox id="isBillDate"
+								label="申请日期"
+								selected="false"
+								keyUp="textinput1_keyUpHandler(event,beginApplyDate)"/>
+					<mx:DateField id="beginApplyDate"
+								  width="100%"
+								  formatString="YYYY-MM-DD"
+								  enabled="{isBillDate.selected}"
+								  enterFrame="{beginApplyDate.selectedDate==null?beginApplyDate.selectedDate=new Date():beginApplyDate.selectedDate}"
+								  selectableRange="{{rangeEnd:endApplyDate.selectedDate}}"
+								  keyUp="textinput1_keyUpHandler(event,endApplyDate)"/>
+					<s:Label text="-"/>
+					<mx:DateField id="endApplyDate"
+								  width="100%"
+								  formatString="YYYY-MM-DD"
+								  enabled="{isBillDate.selected}"
+								  enterFrame="{endApplyDate.selectedDate==null?endApplyDate.selectedDate=new Date():endApplyDate.selectedDate}"
+								  selectableRange="{{rangeStart:beginApplyDate.selectedDate}}"
+								  keyUp="textinput1_keyUpHandler(event,patientId)"/>
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<s:Label text="标 识 号"/>
+					<s:TextInput id="patientId"
+								 width="100%"
+								 keyUp="textinput1_keyUpHandler(event,inpNo)"/>
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<s:Label text="住 院 号"/>
+					<s:TextInput id="inpNo"
+								 width="100%"
+								 keyUp="textinput1_keyUpHandler(event,personName)"/>
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<s:Label text="病人姓名"/>
+					<s:TextInput id="personName"
+								 width="100%"
+								 keyUp="textinput1_keyUpHandler(event,deptCode)"/>
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<s:Label text="所在科室"/>
+					<s:TextInput id="deptCode"
+								 width="100%"
+								 keyUp="textinput1_keyUpHandler(event,wardCode)"/>
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<s:Label text="所在病区"/>
+					<s:TextInput id="wardCode"
+								 width="100%"
+								 keyUp="textinput1_keyUpHandler(event,currentStatus)"/>
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<s:Label text="当前状态"/>
+					<s:DropDownList id="currentStatus"
+									width="100%"
+									height="25"
+									selectedIndex="0"
+									labelField="currentStatusName"
+									dataProvider="{currentStatusArray}"
+									keyUp="textinput1_keyUpHandler(event,btQuery)"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:NavigatorContent>
+	</mx:TabNavigator>
+	<s:HGroup width="100%"
+			  height="29"
+			  horizontalAlign="right"
+			  verticalAlign="middle">
+		<mx:LinkButton id="btQuery"
+					   height="26"
+					   label=" 确 定"
+					   skin="mx.skins.halo.ButtonSkin"
+					   icon="@Embed(source='/assets/images/button/confirm20.png')"
+					   click="btQuery_clickHandler(event)"/>
+		<mx:LinkButton id="btReturn"
+					   height="26"
+					   label=" 取消"
+					   skin="mx.skins.halo.ButtonSkin"
+					   icon="@Embed(source='/assets/images/button/return20.png')"
+					   click="btReturn_clickHandler()"/>
+	</s:HGroup>
+</s:TitleWindow>

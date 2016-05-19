@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+当前库存量列表模块  查询窗体
+author:周作建  2011.06.05
+checked by
+-->
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="906"
+			   height="338"
+			   backgroundColor="0xE2E8E8"
+			   title="当前库存量列表"
+			   creationComplete="titlewindow1_creationCompleteHandler(event)"
+			   close="titlewindow1_closeHandler(event)"
+			   xmlns:controls="cn.superion.base.components.controls.*">
+	<fx:Script>
+		<![CDATA[
+			import cn.superion.base.components.controls.CheckBoxIR;
+			import cn.superion.base.config.BaseDict;
+			import cn.superion.base.config.ParameterObject;
+			import cn.superion.base.util.ArrayCollUtils;
+			import cn.superion.base.util.RemoteUtil;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ListEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.remoting.RemoteObject;
+
+			public var destination:String="deptCommMaterialServiceImpl";
+
+			public var materialId:String;
+			public var storageCode:String;
+			public var batch:String;
+
+			public var callback:Function;
+
+			protected function titlewindow1_creationCompleteHandler(event:FlexEvent):void
+			{
+				var parameter:ParameterObject=new ParameterObject();
+
+				parameter.conditions.storageCode=storageCode;
+				parameter.conditions.materialId=materialId;
+				parameter.conditions.batch=batch;
+
+				var ro:RemoteObject=RemoteUtil.getRemoteObject(destination, function(rev:Object):void
+				{
+					if (rev.data && rev.data.length > 0)
+					{
+						gdRdsDetail.dataProvider=rev.data as ArrayCollection;
+						gdRdsDetail.selectedIndex=0
+						gdRdsDetail.setFocus();
+					}
+				});
+				ro.findCurrentStockByFactoryBatch(parameter);
+
+				this.setFocus();
+				gdRdsDetail.setFocus();
+			}
+
+
+			protected function titlewindow1_closeHandler(event:CloseEvent):void
+			{
+				PopUpManager.removePopUp(this);
+			}
+
+			protected function gdRdsDetail_itemDoubleClickHandler(event:ListEvent):void
+			{
+				confirmSelected();
+				return;
+			}
+
+			/**
+			 * 生产厂家
+			 */
+			private function factoryLBF(item:Object, column:DataGridColumn):String
+			{
+				if (item.factoryCode == '')
+				{
+					item.factoryName='';
+				}
+				else
+				{
+					var provider:Object=ArrayCollUtils.findItemInArrayByValue(BaseDict.providerDict, 'provider', item.factoryCode);
+
+					item.factoryName=provider == null ? "" : provider.providerName;
+				}
+				return item.factoryName;
+			}
+
+			/**
+			 * 批号
+			 */
+			private function batchLBF(item:Object, column:DataGridColumn):String
+			{
+				if (item.batch == '0')
+				{
+					item.batchName='';
+				}
+				else
+				{
+					item.batchName=item.batch;
+				}
+				return item.batchName;
+			}
+
+			protected function btConfirm_clickHandler(event:MouseEvent):void
+			{
+				confirmSelected();
+				return;
+			}
+
+
+			protected function btReturn_clickHandler(event:MouseEvent):void
+			{
+				PopUpManager.removePopUp(this);
+			}
+
+			/**
+			 * 确定选择的物资
+			 * */
+			private function confirmSelected(event:*=null):void
+			{
+				var litemSelected:*=gdRdsDetail.selectedItem;
+				var lselectedMaterials:*=getAllSelectedItem();
+
+				if (lselectedMaterials.length == 0)
+				{
+					if (litemSelected)
+					{
+						lselectedMaterials=[litemSelected];
+					}
+					else
+					{
+						PopUpManager.removePopUp(this);
+						return;
+					}
+				}
+
+				callback(lselectedMaterials);
+
+				PopUpManager.removePopUp(this);
+			}
+
+			private function getAllSelectedItem():*
+			{
+				var laryMaterials:*=gdRdsDetail.dataProvider;
+				var larySelectedMaterials:Array=[];
+				for each (var material:* in laryMaterials)
+				{
+					if (material.isSelected)
+					{
+						larySelectedMaterials.push(material);
+					}
+				}
+				return larySelectedMaterials;
+			}
+
+			protected function gdRdsDetail_keyUpHandler(event:KeyboardEvent):void
+			{
+				var lselItem:Object=gdRdsDetail.selectedItem
+				if(!lselItem){
+					return
+				}
+				if(event.keyCode==Keyboard.SPACE){
+					lselItem.isSelected=!lselItem.isSelected
+					gdRdsDetail.invalidateList()
+				}
+				if(event.keyCode==Keyboard.ENTER){
+					confirmSelected();
+
+				}
+			}
+
+		]]>
+	</fx:Script>
+	<s:VGroup width="100%"
+			  height="100%"
+			  paddingBottom="5"
+			  paddingLeft="5"
+			  paddingRight="5"
+			  paddingTop="5">
+		<controls:SuperDataGrid id="gdRdsDetail"
+								width="100%"
+								height="100%"
+								styleName="dataGrid" keyUp="gdRdsDetail_keyUpHandler(event)"
+								itemDoubleClick="gdRdsDetail_itemDoubleClickHandler(event)">
+			<controls:columns>
+				<mx:DataGridColumn headerText=""
+								   dataField="isSelected"
+								   width="40"
+								   textAlign="center"
+								   headerRenderer="{new ClassFactory(CheckBoxIR)}"
+								   itemRenderer="{new ClassFactory(CheckBoxIR)}"/>
+				<mx:DataGridColumn headerText="物资名称"
+								   width="220"
+								   dataField="materialName"
+								   textAlign="left"/>
+				<mx:DataGridColumn headerText="规格型号"
+								   width="150"
+								   dataField="materialSpec"
+								   textAlign="left"/>
+				<mx:DataGridColumn headerText="单位"
+								   width="60"
+								   dataField="materialUnits"
+								   textAlign="left"/>
+				<mx:DataGridColumn headerText="库存量"
+								   width="70"
+								   dataField="amount"
+								   textAlign="right"/>
+				<mx:DataGridColumn headerText="批号"
+								   width="70"
+								   dataField="batchName"
+								   textAlign="left"
+								   labelFunction="batchLBF"/>
+				<mx:DataGridColumn headerText="条形码"
+								   width="130"
+								   dataField="barCode"
+								   textAlign="left"/>
+				<mx:DataGridColumn headerText="有效期至"
+								   width="100"
+								   dataField="availDate"
+								   textAlign="left"/>
+				<mx:DataGridColumn headerText="生产厂家"
+								   width="200"
+								   dataField="factoryName"
+								   textAlign="left"
+								   labelFunction="factoryLBF"/>
+			</controls:columns>
+		</controls:SuperDataGrid>
+		<s:HGroup width="100%"
+				  height="31"
+				  bottom="5"
+				  horizontalAlign="right"
+				  verticalAlign="middle"
+				  gap="5">
+			<mx:LinkButton id="btConfirm"
+						   icon="@Embed('/assets/images/button/confirm20.png')"
+						   label=" 确 定 "
+						   skin="mx.skins.halo.ButtonSkin"
+						   height="26"
+						   click="btConfirm_clickHandler(event)"/>
+			<mx:LinkButton id="btReturn"
+						   height="26"
+						   label=" 取 消"
+						   skin="mx.skins.halo.ButtonSkin"
+						   icon="@Embed(source='assets/images/button/return20.png')"
+						   click="btReturn_clickHandler(event)"/>
+		</s:HGroup>
+	</s:VGroup>
+
+</s:TitleWindow>

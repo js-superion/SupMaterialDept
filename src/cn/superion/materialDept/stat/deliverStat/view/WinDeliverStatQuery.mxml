@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	 出库汇总表查询模块
+	 author: 芮玉红  2011.02.24
+-->
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   backgroundColor="0xE2E8E8"
+			   width="500"
+			   height="326"
+			   title="出库汇总表"
+			   close="closeWin()"
+			   xmlns:controls="cn.superion.base.components.controls.*"
+			   creationComplete="doInit()">
+	<s:layout>
+		<s:VerticalLayout paddingLeft="10"
+						  paddingRight="10"
+						  paddingTop="10"
+						  paddingBottom="10"/>
+	</s:layout>
+
+	<fx:Script source="WinDeliverStatQueryas.as"/>
+
+	<fx:Declarations>
+		<s:RadioButtonGroup id="btGroup"/>
+	</fx:Declarations>
+
+	<mx:TabNavigator width="100%"
+					 height="100%"
+					 paddingBottom="15"
+					 paddingTop="15"
+					 paddingLeft="15"
+					 paddingRight="15"
+					 backgroundColor="0xE2E8E8">
+		<s:NavigatorContent id="queryCondition"
+							label="查询条件"
+							width="100%"
+							height="100%">
+			<s:VGroup id="queryPanel"
+					  width="100%"
+					  height="100%">
+				<s:HGroup width="100%"
+						  verticalAlign="middle"
+						  paddingTop="3">
+					<s:CheckBox id="billDate"
+								label="单据日期"
+								width="75"
+								keyUp="toNextControl(event,beginBillDate)"/>
+					<mx:DateField id="beginBillDate"
+								  keyUp="toNextControl(event,endBillDate)"
+								  width="100%"
+								  enabled="{billDate.selected}"
+								  formatString="YYYY-MM-DD"
+								  enterFrame="{beginBillDate.selectedDate==null?beginBillDate.selectedDate=new Date():beginBillDate.selectedDate}"
+								  selectableRange="{{rangeEnd:endBillDate.selectedDate}}"/>
+					<s:Label text="-"/>
+					<mx:DateField id="endBillDate"
+								  keyUp="toNextControl(event,operationType)"
+								  width="100%"
+								  enabled="{billDate.selected}"
+								  formatString="YYYY-MM-DD"
+								  enterFrame="{endBillDate.selectedDate==null?endBillDate.selectedDate=new Date():endBillDate.selectedDate}"
+								  selectableRange="{{rangeStart:beginBillDate.selectedDate,rangeEnd:new Date()}}"/>
+				</s:HGroup>
+
+				<s:HGroup width="100%"
+						  verticalAlign="middle"
+						  paddingTop="3">
+					<s:Label text="业务类型"
+							 width="75"/>
+					<s:ComboBox id="operationType"
+								width="100%"
+								height="25"
+								selectedIndex="0"
+								requireSelection="true"
+								labelField="operationTypeName"
+								keyUp="toNextControl(event,rdType)"/>
+				</s:HGroup>
+
+				<s:HGroup width="100%"
+						  verticalAlign="middle"
+						  paddingTop="3">
+					<s:Label text="出库类别"
+							 width="75"/>
+					<controls:TextInputIcon id="rdType"
+											width="100%"
+											queryIconClick="rdType_queryIconClickHandler(event)"
+											keyUp="queryIcon_keyUpHandler(event,materialClass)"/>
+				</s:HGroup>
+
+				<s:HGroup width="100%"
+						  verticalAlign="middle"
+						  paddingTop="3">
+					<s:Label text="物资分类"
+							 width="75"/>
+					<controls:TextInputIcon id="materialClass"
+											width="100%"
+											queryIconClick="materialClass_queryIconClickHandler(event)"
+											keyUp="queryIcon_keyUpHandler(event,materialCode)"/>
+				</s:HGroup>
+
+				<s:HGroup width="100%"
+						  verticalAlign="middle"
+						  paddingTop="3">
+					<s:Label text="物资名称"
+							 width="75"/>
+					<controls:TextInputIcon id="materialCode"
+											width="100%"
+											queryIconClick="materialCode_queryIconClickHandler()"
+											keyUp="queryIcon_keyUpHandler(event,btMaterialClass)"/>
+				</s:HGroup>
+
+				<s:HGroup width="100%"
+						  verticalAlign="middle"
+						  paddingTop="3">
+					<s:Label text="分组汇总"
+							 width="75"/>
+					<s:RadioButton id="btMaterialClass"
+								   label="物资分类"
+								   selected="true"
+								   value="materialClassName"
+								   groupName="btGroup"
+								   keyUp="toNextControl(event,btMaterialName)"/>
+					<s:RadioButton id="btMaterialName"
+								   label="物资名称"
+								   value="materialName"
+								   groupName="btGroup"
+								   keyUp="toNextControl(event,btConfirm)"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:NavigatorContent>
+	</mx:TabNavigator>
+
+	<s:HGroup width="100%"
+			  height="31"
+			  horizontalAlign="right"
+			  verticalAlign="middle">
+		<mx:LinkButton id="btConfirm"
+					   label=" 确定 "
+					   skin="mx.skins.halo.ButtonSkin"
+					   buttonMode="true"
+					   fontSize="12"
+					   width="86"
+					   height="26"
+					   icon="@Embed('/assets/images/button/confirm20.png')"
+					   click="btQuery_clickHandler()"/>
+		<mx:LinkButton id="cancel"
+					   label=" 取消 "
+					   skin="mx.skins.halo.ButtonSkin"
+					   buttonMode="true"
+					   fontSize="12"
+					   width="86"
+					   height="26"
+					   icon="@Embed('/assets/images/button/return20.png')"
+					   click="closeWin()"/>
+	</s:HGroup>
+
+</s:TitleWindow>

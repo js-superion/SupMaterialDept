@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="400"
+			   height="230"
+			   backgroundColor="0xE2E8E8"
+			   title="科室用包查询"
+			   close="PopUpManager.removePopUp(this)"
+			   xmlns:controls="cn.superion.base.components.controls.*"
+			   creationComplete="titlewindow1_creationCompleteHandler(event)">
+	<s:layout>
+		<s:VerticalLayout paddingLeft="10"
+						  paddingRight="10"
+						  paddingTop="10"/>
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import cn.superion.base.config.ParameterObject;
+			import cn.superion.base.util.FormUtils;
+			import cn.superion.base.util.RemoteUtil;
+			import cn.superion.dataDict.DictWinShower;
+			import cn.superion.materialDept.receive.receiveBag.ModReceiveBag;
+			import cn.superion.materialDept.util.MainToolBar;
+			import cn.superion.materialDept.util.MaterialDictShower;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.remoting.RemoteObject;
+			public  var data:Object={};
+			private static var _condition:Object={};
+			public static const DESTANATION:String='cssdApplyImpl';
+			/**
+			 * 处理回车键转到下一个控件
+			 * */
+			private function toNextControl(e:KeyboardEvent, fcontrolNext:Object):void
+			{
+				FormUtils.toNextControl(e, fcontrolNext);
+			}
+			/**
+			 * 单据日期选择
+			 * */
+			protected function chkBillDate_changeHandler(event:Event):void
+			{
+				if (chkBillDate.selected)
+				{
+					beginBillDate.enabled=true;
+					endBillDate.enabled=true;
+				}
+				else
+				{
+					beginBillDate.enabled=false;
+					endBillDate.enabled=false;
+				}
+			}
+
+			/**
+			 * 查询按钮
+			 */ 
+			protected function btConfirm_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				var paramQuery:ParameterObject=new ParameterObject();
+				// 单据编号
+				_condition["beginBillNo"]=beginBillNo.text==""?null:beginBillNo.text;
+				_condition["endBillNo"]=endBillNo.text==""?null:endBillNo.text;
+				//单据日期
+				if (chkBillDate.selected)
+				{
+					
+					_condition['beginBillDate']=beginBillDate.selectedDate;
+					_condition['endBillDate']=MainToolBar.addOneDay(endBillDate.selectedDate);
+				}
+				_condition["currentStatus"]=currentStatus.selectedItem.currentStatus
+				
+				paramQuery.conditions=_condition;
+				var ro:RemoteObject=RemoteUtil.getRemoteObject(DESTANATION, function(rev:Object):void
+				{
+					data.parentWin.patsMasterId(rev.data);
+					btReturn_clickHandler();
+				});
+				ro.findApplyMasterListByCondition(paramQuery);
+			}
+			/**
+			 * 退出按钮
+			 */ 
+			protected function btReturn_clickHandler():void
+			{
+				// TODO Auto-generated method stub
+				PopUpManager.removePopUp(this);
+			}
+
+
+			protected function titlewindow1_creationCompleteHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				_condition={};
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+	</fx:Declarations>
+	<!-- 查询条件区 -->
+	<mx:TabNavigator width="378"
+					 height="150"
+					 paddingBottom="15"
+					 paddingTop="15"
+					 paddingLeft="15"
+					 paddingRight="15"
+					 backgroundColor="0xE2E8E8">
+		<s:NavigatorContent width="350"
+							height="240"
+							label="查询条件">
+			<s:VGroup id="receiveOtherQuery"
+					  width="100%"
+					  height="100%">
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<mx:FormItem label="单据编号"
+								 fontSize="14"
+								 width="56%">
+						<s:TextInput id="beginBillNo"
+									 width="100%"
+									 maxChars="30"
+									 restrict="0-9"
+									 keyUp="toNextControl(event,endBillNo)"/>
+					</mx:FormItem>
+					<mx:FormItem label="-"
+								 fontSize="14"
+								 labelWidth="10"
+								 width="44%"
+								 horizontalGap="0">
+						<s:TextInput id="endBillNo"
+									 width="100%"
+									 maxChars="30"
+									 restrict="0-9"
+									 keyUp="toNextControl(event,chkBillDate)"/>
+					</mx:FormItem>
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<mx:FormItem fontSize="14"
+								 direction="horizontal"
+								 width="100%"
+								 indicatorGap="0">
+						<s:CheckBox id="chkBillDate"
+									label="单据日期"
+									keyUp="toNextControl(event,beginBillDate)"
+									change="chkBillDate_changeHandler(event)"/>
+						<mx:DateField id="beginBillDate"
+									  width="50%"
+									  enabled="false"
+									  formatString="YYYY-MM-DD"
+									  enterFrame="{beginBillDate.selectedDate==null?beginBillDate.selectedDate=new Date():beginBillDate.selectedDate}"
+									  selectableRange="{{rangeEnd:endBillDate.selectedDate}}"
+									  showToday="true"
+									  keyUp="toNextControl(event,endBillDate)"/>
+						<mx:FormItem label="-"
+									 fontSize="14"
+									 labelWidth="10"
+									 width="50%"
+									 horizontalGap="0">
+							<mx:DateField id="endBillDate"
+										  width="100%"
+										  enabled="false"
+										  formatString="YYYY-MM-DD"
+										  enterFrame="{endBillDate.selectedDate==null?endBillDate.selectedDate=new Date():endBillDate.selectedDate}"
+										  selectableRange="{{rangeStart:beginBillDate.selectedDate, rangeEnd:new Date()}}"
+										  showToday="true"
+										  keyUp="toNextControl(event,currentStatus)"/>
+						</mx:FormItem>
+					</mx:FormItem>
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<mx:FormItem label="当前状态"
+								 fontSize="14"
+								 width="100%">
+						<s:DropDownList id="currentStatus"
+										width="100%"
+										height="25"
+										dataProvider="{new ArrayCollection([{currentStatus:null,currentStatusName:'全部'},
+										{currentStatus:'0',currentStatusName:'未审核'},			
+										{currentStatus:'1',currentStatusName:'审核'},
+										{currentStatus:'3',currentStatusName:'发放'}])}"
+										labelField="currentStatusName"
+										selectedIndex="0"
+										keyUp="toNextControl(event,btConfirm)"/>
+					</mx:FormItem>
+				</s:HGroup>
+			</s:VGroup>
+		</s:NavigatorContent>
+	</mx:TabNavigator>
+	<s:HGroup width="100%"
+			  height="31"
+			  horizontalAlign="right"
+			  verticalAlign="middle"
+			  gap="5">
+		<mx:LinkButton id="btConfirm"
+					   icon="@Embed('/assets/images/button/confirm20.png')"
+					   label=" 确 定 "
+					   skin="mx.skins.halo.ButtonSkin"
+					   height="26"
+					   click="btConfirm_clickHandler(event)"/>
+		<mx:LinkButton id="btReturn"
+					   height="26"
+					   label=" 取 消"
+					   skin="mx.skins.halo.ButtonSkin"
+					   click="btReturn_clickHandler()"
+					   icon="@Embed(source='assets/images/button/return20.png')"/>
+	</s:HGroup>
+</s:TitleWindow>

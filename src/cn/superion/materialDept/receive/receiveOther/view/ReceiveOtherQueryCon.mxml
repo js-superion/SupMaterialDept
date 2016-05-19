@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	 其他入库处理模块  查询窗体
+	 author:吴小娟   2011.02.24
+	 checked by
+-->
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="400"
+			   height="350"
+			   backgroundColor="0xE2E8E8"
+			   title="其他入库处理列表"
+			   close="PopUpManager.removePopUp(this)"
+			   creationComplete="doInit()"
+			   xmlns:controls="cn.superion.base.components.controls.*">
+	<s:layout>
+		<s:VerticalLayout paddingLeft="10"
+						  paddingRight="10"
+						  paddingTop="10"/>
+	</s:layout>
+	<fx:Script source="ReceiveOtherQueryConas.as"/>
+	<fx:Declarations>
+		<mx:NumberValidator id="beginTradePriceValid"
+							source="{beginTradePrice}"
+							property="text"
+							required="false"
+							domain="real"
+							precision="2"
+							precisionError="小数点后最多只能有2位数字"
+							minValue="0"
+							maxValue="9999999999.99"
+							exceedsMaxError="输入的值太大,不得超过最大值9999999999.99"/>
+		<mx:NumberValidator id="endTradePriceValid"
+							source="{endTradePrice}"
+							property="text"
+							required="false"
+							domain="real"
+							precision="2"
+							precisionError="小数点后最多只能有2位数字"
+							minValue="0"
+							maxValue="9999999999.99"
+							exceedsMaxError="输入的值太大,不得超过最大值9999999999.99"/>
+	</fx:Declarations>
+	<!-- 查询条件区 -->
+	<mx:TabNavigator width="378"
+					 height="260"
+					 paddingBottom="15"
+					 paddingTop="15"
+					 paddingLeft="15"
+					 paddingRight="15"
+					 backgroundColor="0xE2E8E8">
+		<s:NavigatorContent width="350"
+							height="230"
+							label="查询条件">
+			<s:VGroup id="receiveOtherQuery"
+					  width="100%"
+					  height="100%">
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<mx:FormItem label="业务类型"
+								 width="100%"
+								 fontSize="14">
+						<s:DropDownList id="operationType"
+										width="100%"
+										height="25"
+										labelField="operationTypeName"
+										requireSelection="true"
+										dataProvider="{new ArrayCollection([{operationType:'104',operationTypeName:'盘盈入库'},
+								     	{operationType:'109',operationTypeName:'其他入库'}])}"
+										selectedIndex="1"
+										keyUp="toNextControl(event,beginBillNo)"/>
+					</mx:FormItem>
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<mx:FormItem label="入库单号"
+								 fontSize="14"
+								 width="56%">
+						<s:TextInput id="beginBillNo"
+									 width="100%"
+									 maxChars="30"
+									 restrict="0-9"
+									 keyUp="toNextControl(event,endBillNo)"/>
+					</mx:FormItem>
+					<mx:FormItem label="-"
+								 fontSize="14"
+								 labelWidth="10"
+								 width="44%"
+								 horizontalGap="0">
+						<s:TextInput id="endBillNo"
+									 width="100%"
+									 maxChars="30"
+									 restrict="0-9"
+									 keyUp="toNextControl(event,chkImportDate)"/>
+					</mx:FormItem>
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<mx:FormItem fontSize="14"
+								 direction="horizontal"
+								 width="100%"
+								 indicatorGap="0">
+						<s:CheckBox id="chkImportDate"
+									label="入库日期"
+									keyUp="toNextControl(event,beginBillDate)"
+									change="chkImportDate_changeHandler(event)"/>
+						<mx:DateField id="beginBillDate"
+									  width="50%"
+									  enabled="false"
+									  formatString="YYYY-MM-DD"
+									  enterFrame="{beginBillDate.selectedDate==null?beginBillDate.selectedDate=new Date():beginBillDate.selectedDate}"
+									  selectableRange="{{rangeEnd:endBillDate.selectedDate}}"
+									  showToday="true"
+									  keyUp="toNextControl(event,endBillDate)"/>
+						<mx:FormItem label="-"
+									 fontSize="14"
+									 labelWidth="10"
+									 width="50%"
+									 horizontalGap="0">
+							<mx:DateField id="endBillDate"
+										  width="100%"
+										  enabled="false"
+										  formatString="YYYY-MM-DD"
+										  enterFrame="{endBillDate.selectedDate==null?endBillDate.selectedDate=new Date():endBillDate.selectedDate}"
+										  selectableRange="{{rangeStart:beginBillDate.selectedDate, rangeEnd:new Date()}}"
+										  showToday="true"
+										  keyUp="toNextControl(event,rdType)"/>
+						</mx:FormItem>
+					</mx:FormItem>
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<mx:FormItem label="入库类别"
+								 width="100%"
+								 fontSize="14">
+						<s:DropDownList id="rdType"
+										width="100%"
+										height="25"
+										labelField="receviceTypeName"
+										selectedIndex="1"
+										requireSelection="true"
+										dataProvider="{new ArrayCollection([{receviceType:'102', receviceTypeName:'盘盈入库'},
+							{receviceType:'109', receviceTypeName:'其他入库'}])}"
+										keyUp="toNextControl(event,materialCode)"/>
+					</mx:FormItem>
+				</s:HGroup>
+				<!--<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<s:Label text="部　　门"
+							 width="60"
+							 fontSize="14"/>
+					<controls:TextInputIcon id="deptCode"
+											width="100%"
+											maxChars="20"
+											queryIconClick="deptCode_queryIconClickHandler()"
+											keyUp="textInputIcon_keyUpHandler(event,materialCode)"/>
+				</s:HGroup>-->
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<s:Label text="物资编码"
+							 width="60"
+							 fontSize="14"/>
+					<controls:TextInputIcon id="materialCode"
+											width="100%"
+											maxChars="20"
+											queryIconClick="materialCode_queryIconClickHandler()"
+											keyUp="textInputIcon_keyUpHandler(event,beginTradePrice)"/>
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<mx:FormItem label="进　　价"
+								 fontSize="14"
+								 width="56%">
+						<s:TextInput id="beginTradePrice"
+									 width="100%"
+									 restrict="0-9"
+									 keyUp="toNextControl(event,endTradePrice)"/>
+					</mx:FormItem>
+					<mx:FormItem label="-"
+								 fontSize="14"
+								 labelWidth="10"
+								 width="44%"
+								 horizontalGap="0">
+						<s:TextInput id="endTradePrice"
+									 width="100%"
+									 restrict="0-9"
+									 keyUp="toNextControl(event,currentStatus)"/>
+					</mx:FormItem>
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<mx:FormItem label="当前状态"
+								 fontSize="14"
+								 width="100%">
+						<s:DropDownList id="currentStatus"
+										width="100%"
+										height="25"
+										dataProvider="{new ArrayCollection([{currentStatus:null,currentStatusName:'全部'},
+							{currentStatus:'0',currentStatusName:'新建状态'},
+							{currentStatus:'1',currentStatusName:'审核状态'}, 
+							{currentStatus:'2',currentStatusName:'记账状态'}])}"
+										labelField="currentStatusName"
+										selectedIndex="0"
+										keyUp="toNextControl(event,btConfirm)"/>
+					</mx:FormItem>
+				</s:HGroup>
+			</s:VGroup>
+		</s:NavigatorContent>
+	</mx:TabNavigator>
+	<s:HGroup width="100%"
+			  height="31"
+			  horizontalAlign="right"
+			  verticalAlign="middle"
+			  gap="5">
+		<mx:LinkButton id="btConfirm"
+					   icon="@Embed('/assets/images/button/confirm20.png')"
+					   label=" 确 定 "
+					   skin="mx.skins.halo.ButtonSkin"
+					   height="26"
+					   click="btConfirm_clickHandler()"
+					   keyUp="btConfirm_keyUpHandler(event)"/>
+		<mx:LinkButton id="btReturn"
+					   height="26"
+					   label=" 取 消"
+					   skin="mx.skins.halo.ButtonSkin"
+					   icon="@Embed(source='assets/images/button/return20.png')"
+					   click="btReturn_clickHandler(event)"/>
+	</s:HGroup>
+</s:TitleWindow>

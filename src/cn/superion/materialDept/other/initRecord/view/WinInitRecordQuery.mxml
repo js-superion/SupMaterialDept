@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	 期初结存录入模块  查询窗体
+	 author:吴小娟   2011.02.26
+	 modify:吴小娟   2011.07.05
+	 checked by
+-->
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="500"
+			   height="314"
+			   backgroundColor="0xE2E8E8"
+			   title="期初结存录入"
+			   creationComplete="doInit()"
+			   close="closeWin()"
+			   xmlns:controls="cn.superion.base.components.controls.*">
+
+	<fx:Script source="WinInitRecordQueryas.as"/>
+	<s:layout>
+		<s:VerticalLayout paddingLeft="10"
+						  paddingRight="10"
+						  paddingTop="10"/>
+	</s:layout>
+	<!-- 查询条件区 -->
+	<mx:TabNavigator width="478"
+					 height="223"
+					 paddingBottom="15"
+					 paddingTop="15"
+					 paddingLeft="15"
+					 paddingRight="15"
+					 backgroundColor="0xE2E8E8">
+		<s:NavigatorContent width="450"
+							height="100%"
+							label="查询条件">
+			<s:VGroup id="receiveOtherQuery"
+					  width="100%"
+					  height="100%">
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<s:Label text="入库单号"
+							 width="75"/>
+					<s:TextInput id="beginBillNo"
+								 width="50%"
+								 keyUp="toNextControl(event,endBillNo)"/>
+					<s:Label text="-"
+							 width="8"/>
+					<s:TextInput id="endBillNo"
+								 width="50%"
+								 keyUp="toNextControl(event,billDate)"/>
+
+				</s:HGroup>
+
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+
+					<s:CheckBox id="billDate"
+								label="入库日期"
+								width="75"
+								keyUp="toNextControl(event,beginBillDate)"/>
+					<mx:DateField id="beginBillDate"
+								  width="50%"
+								  enabled="{billDate.selected}"
+								  formatString="YYYY-MM-DD"
+								  enterFrame="{beginBillDate.selectedDate==null?beginBillDate.selectedDate=new Date():beginBillDate.selectedDate}"
+								  selectableRange="{{rangeEnd:endBillDate.selectedDate}}"
+								  showToday="true"
+								  keyUp="toNextControl(event,endBillDate)"/>
+					<s:Label text="-"
+							 width="8"/>
+					<mx:DateField id="endBillDate"
+								  width="50%"
+								  enabled="{billDate.selected}"
+								  formatString="YYYY-MM-DD"
+								  enterFrame="{endBillDate.selectedDate==null?endBillDate.selectedDate=new Date():endBillDate.selectedDate}"
+								  selectableRange="{{rangeStart:beginBillDate.selectedDate, rangeEnd:new Date()}}"
+								  showToday="true"
+								  keyUp="toNextControl(event,materialCode)"/>
+				</s:HGroup>
+
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<s:Label text="物资编码"
+							 width="75"/>
+					<controls:TextInputIcon id="materialCode"
+											width="100%"
+											queryIconClick="materialCode_queryIconClickHandler()"
+											keyUp="textInputIcon_keyUpHandler(event,deptCode)"/>
+				</s:HGroup>
+
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<s:Label text="部　　门"
+							 width="75"/>
+					<controls:TextInputIcon id="deptCode"
+											width="100%"
+											queryIconClick="deptCode_queryIconClickHandler()"
+											keyUp="toNextControl(event,personId)"/>
+				</s:HGroup>
+
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<s:Label text="经 手 人"
+							 width="75"/>
+					<controls:TextInputIcon id="personId"
+											width="100%"
+											queryIconClick="personId_queryIconClickHandler()"
+											keyUp="toNextControl(event,currentStatus)"/>
+				</s:HGroup>
+
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<s:Label text="当前状态"
+							 width="75"/>
+					<s:ComboBox id="currentStatus"
+								width="50%"
+								height="25"
+								dataProvider="{new ArrayCollection([{currentStatus: '0', currentStatusName: '未审核'}, 
+						{currentStatus: '1', currentStatusName: '已审核'},
+						{currentStatus:'2',currentStatusName:'已记账'}])}"
+								selectedIndex="0"
+								labelField="currentStatusName"
+								keyUp="toNextControl(event,agentSign)"/>
+					<s:CheckBox id="agentSign"
+								label="是否受托代销"
+								keyUp="toNextControl(event,btConfirm)"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:NavigatorContent>
+	</mx:TabNavigator>
+	<s:HGroup width="100%"
+			  height="31"
+			  horizontalAlign="right"
+			  verticalAlign="middle"
+			  gap="5">
+		<mx:LinkButton id="btConfirm"
+					   icon="@Embed('/assets/images/button/confirm20.png')"
+					   label=" 确 定 "
+					   skin="mx.skins.halo.ButtonSkin"
+					   height="26"
+					   click="btConfirm_clickHandler()"/>
+		<mx:LinkButton id="btReturn"
+					   height="26"
+					   label=" 取 消"
+					   skin="mx.skins.halo.ButtonSkin"
+					   icon="@Embed(source='assets/images/button/return20.png')"
+					   click="btReturn_clickHandler()"/>
+	</s:HGroup>
+</s:TitleWindow>

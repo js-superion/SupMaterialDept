@@ -1,0 +1,284 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009"
+		   xmlns:s="library://ns.adobe.com/flex/spark"
+		   xmlns:mx="library://ns.adobe.com/flex/mx"
+		   width="100%"
+		   height="100%"
+		   show="showInit()"
+		   xmlns:view="cn.superion.materialDept.main.view.*">
+	<fx:Script>
+		<![CDATA[
+			import cn.superion.base.config.AppInfo;
+			import cn.superion.materialDept.main.view.MainMenuItem;
+			import cn.superion.materialDept.main.view.MainMenuItemH;
+
+			import mx.collections.ArrayCollection;
+
+			//窗口初始化
+			protected function showInit():void
+			{
+				createMenuItem(menuIn);
+				fillMenu('01', menuIn);
+			}
+
+			private function createMenuItem(menuTab:List):void
+			{
+				var menuClass:Class;
+				if (AppInfo.APP_MENU_STYLE == '0')
+				{
+					//小图标
+					menuClass=MainMenuItemH;
+				}
+				else
+				{
+					//大图标
+					menuClass=MainMenuItem;
+				}
+				menuTab.itemRenderer=new ClassFactory(menuClass);
+			}
+
+			//填充当前菜单
+			private function fillMenu(fmenuCode:String, fsubMenuCon:List):void
+			{
+				var subMenus:Array=getSubMenusFromMenuCode(fmenuCode);
+				fsubMenuCon.dataProvider=new ArrayCollection(subMenus);
+			}
+
+			private function getSubMenusFromMenuCode(fmenuCode:String):Array
+			{
+				var subMenus:Array=[];
+				var menus:ArrayCollection=AppInfo.currentUserInfo.dataViews;
+				for each (var menuItem:Object in menus)
+				{
+					var lstrMenuNo:String=menuItem.menuNo;
+					if (lstrMenuNo.length == 4 && lstrMenuNo.substr(0, 2) == fmenuCode)
+					{
+						subMenus.push(menuItem);
+					}
+				}
+				return subMenus;
+			}
+
+			//点击中间收缩菜单区
+			protected function mid_left_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				if (menuPanel.width == 0)
+				{
+					menuPanel.width=197
+					menuPanel.visible=true
+					mid_left.source="assets/images/bg/material_menu_mid_left.png";
+				}
+				else
+				{
+					menuPanel.width=0
+					menuPanel.visible=false
+					mid_left.source="assets/images/bg/material_menu_mid_right.png"
+				}
+			}
+		]]>
+	</fx:Script>
+
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:VGroup width="100%"
+			  height="100%"
+			  gap="0">
+		<s:HGroup width="100%"
+				  gap="0">
+			<mx:Image source="assets/images/bg/material_dept_main_01.png"/>
+			<mx:Image source="assets/images/bg/material_dept_main_02.png"
+					  maintainAspectRatio="false"
+					  width="100%"/>
+			<mx:Image source="assets/images/bg/material_dept_main_03.png"
+					  maintainAspectRatio="false"/>
+		</s:HGroup>
+		<s:BorderContainer y="0"
+						   width="100%"
+						   height="36"
+						   backgroundImage="@Embed(source='assets/images/bg/material_mid_menu.jpg')"
+						   backgroundImageFillMode="scale"
+						   backgroundAlpha="0.8"
+						   borderStyle="inset"
+						   borderVisible="false">
+			<view:MainWinMid1 x="0"
+							  y="0"
+							  width="100%"
+							  id="toolBar">
+			</view:MainWinMid1>
+			<view:MainWinMid2
+							  y="0"
+							  width="399"
+							  right="30"
+							  id="topMenuBar">
+			</view:MainWinMid2>
+		</s:BorderContainer>
+		<!-- 菜单部分 -->
+		<s:HGroup x="0"
+				  y="0"
+				  width="100%"
+				  height="100%"
+				  gap="0">
+			<s:BorderContainer id="menuPanel"
+							   width="197"
+							   height="100%">
+				<mx:Accordion x="0"
+							  y="0"
+							  width="100%"
+							  height="100%"
+							  paddingLeft="-6"
+							  borderVisible="false">
+					<!-- 入库业务 -->
+					<s:NavigatorContent label="入库业务"
+										width="100%"
+										height="100%"
+										contentCreationComplete="createMenuItem(menuIn)"
+										icon="@Embed(source='assets/images/menu/m_material_01.png')">
+						<s:List id="menuIn"
+								width="197"
+								height="100%"
+								left="0"
+								borderVisible="false"
+								rollOverColor="#FFFFFF"
+								selectionColor="#FFFFFF">
+						</s:List>
+					</s:NavigatorContent>
+
+					<!-- 出库业务 -->
+					<s:NavigatorContent label="出库业务"
+										width="100%"
+										height="100%"
+										contentCreationComplete="createMenuItem(menuOut)"
+										icon="@Embed(source='assets/images/menu/m_material_02.png')">
+						<s:BorderContainer width="197"
+										   height="100%"
+										   creationComplete="fillMenu('02',menuOut)">
+							<s:List id="menuOut"
+									width="197"
+									height="100%"
+									left="0"
+									borderVisible="false"
+									rollOverColor="#FFFFFF"
+									selectionColor="#FFFFFF">
+							</s:List>
+						</s:BorderContainer>
+					</s:NavigatorContent>
+
+					<!-- 其他业务-->
+					<s:NavigatorContent label="其他业务"
+										width="100%"
+										height="100%"
+										contentCreationComplete="createMenuItem(menuOther)"
+										icon="@Embed(source='assets/images/menu/m_material_03.png')">
+						<s:BorderContainer width="197"
+										   height="100%"
+										   creationComplete="fillMenu('03',menuOther)">
+							<s:List id="menuOther"
+									width="197"
+									height="100%"
+									left="0"
+									borderVisible="false"
+									rollOverColor="#FFFFFF"
+									selectionColor="#FFFFFF">
+							</s:List>
+						</s:BorderContainer>
+					</s:NavigatorContent>
+					<!-- 单据列表-->
+					<s:NavigatorContent label="单据列表"
+										width="100%"
+										height="100%"
+										contentCreationComplete="createMenuItem(menuBill)"
+										icon="@Embed(source='assets/images/menu/m_material_04.png')">
+						<s:BorderContainer width="197"
+										   height="100%"
+										   creationComplete="fillMenu('04',menuBill)">
+							<s:List id="menuBill"
+									width="197"
+									height="100%"
+									left="0"
+									borderVisible="false"
+									rollOverColor="#FFFFFF"
+									selectionColor="#FFFFFF">
+							</s:List>
+						</s:BorderContainer>
+					</s:NavigatorContent>
+
+					<!-- 报表分析-->
+					<s:NavigatorContent label="查询统计"
+										width="100%"
+										height="100%"
+										contentCreationComplete="createMenuItem(menuReportAnaly)"
+										icon="@Embed(source='assets/images/menu/m_material_05.png')">
+						<s:BorderContainer width="197"
+										   height="100%"
+										   creationComplete="fillMenu('05',menuReportAnaly)">
+							<s:List id="menuReportAnaly"
+									width="197"
+									height="100%"
+									left="0"
+									borderVisible="false"
+									rollOverColor="#FFFFFF"
+									selectionColor="#FFFFFF">
+							</s:List>
+						</s:BorderContainer>
+					</s:NavigatorContent>
+					<!-- 系统参数-->
+					<s:NavigatorContent label="系统维护"
+										width="100%"
+										height="100%"
+										contentCreationComplete="createMenuItem(menuSystem)"
+										icon="@Embed(source='assets/images/menu/m_material_06.png')">
+						<s:BorderContainer width="197"
+										   height="100%"
+										   creationComplete="fillMenu('06',menuSystem)">
+							<s:List id="menuSystem"
+									width="197"
+									height="100%"
+									left="0"
+									borderVisible="false"
+									rollOverColor="#FFFFFF"
+									selectionColor="#FFFFFF">
+							</s:List>
+						</s:BorderContainer>
+					</s:NavigatorContent>
+				</mx:Accordion>
+			</s:BorderContainer>
+			<!-- 收缩区域 -->
+			<s:VGroup width="20"
+					  height="100%"
+					  gap="0">
+				<mx:Image source="assets/images/bg/material_menu_mid_bg.jpg"
+						  maintainAspectRatio="false"
+						  height="100%"/>
+				<mx:Image id="mid_left"
+						  height="67"
+						  left="0"
+						  verticalCenter="0"
+						  useHandCursor="true"
+						  buttonMode="true"
+						  maintainAspectRatio="false"
+						  source="assets/images/bg/material_menu_mid_left.png"
+						  click="mid_left_clickHandler(event)"/>
+				<mx:Image source="assets/images/bg/material_menu_mid_bg.jpg"
+						  maintainAspectRatio="false"
+						  height="100%"/>
+
+			</s:VGroup>
+			<!-- 加载模块区域 -->
+			<s:BorderContainer id="modPanel"
+							   width="100%"
+							   height="100%"
+							   borderVisible="false">
+				<mx:ModuleLoader id="mainFrame"
+								 x="0"
+								 y="0"
+								 width="100%"
+								 height="100%"
+								 url="cn/superion/materialDept/main/view/ModMainRight.swf"
+								 visible="true">
+				</mx:ModuleLoader>
+			</s:BorderContainer>
+		</s:HGroup>
+	</s:VGroup>
+</mx:Canvas>

@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<mx:Module xmlns:fx="http://ns.adobe.com/mxml/2009"
+		   xmlns:s="library://ns.adobe.com/flex/spark"
+		   xmlns:mx="library://ns.adobe.com/flex/mx"
+		   layout="absolute"
+		   width="100%"
+		   height="100%"
+		   xmlns:controls="cn.superion.base.components.controls.*"
+		   creationComplete="doInit()"
+		   xmlns:dataDict="cn.superion.dataDict.*"
+		   xmlns:util="cn.superion.materialDept.util.*">
+	<fx:Script source="ModReceiveBagas.as"/>
+	<fx:Declarations>
+		<s:ArrayCollection id="ary"/>
+		<s:RadioButtonGroup id="rdo" change="rdo_changeHandler(event)"/>
+	</fx:Declarations>
+	<s:BorderContainer width="100%"
+					   height="100%"
+					   backgroundColor="0xE2E8E8"
+					   borderVisible="false">
+		<s:VGroup width="100%"
+				  height="100%"
+				  gap="0">
+			<util:MainToolBar id="btToolBar"
+							  width="100%"
+							  addClick="addClickHandler(event)"
+							  saveClick="saveClickHandler(event)"
+							  cancelClick="btToolBar_cancelClickHandler(event)"
+							  queryClick="btToolBar_queryClickHandler(event)"
+							  deleteClick="btToolBar_deleteClickHandler(event)"
+							  addRowClick="btToolBar_addRowClickHandler(event)"
+							  delRowClick="btToolBar_delRowClickHandler(event)"
+							  modifyClick="btToolBar_modifyClickHandler(event)"
+							  verifyClick="btToolBar_verifyClickHandler(event)"
+							  exitClick="btToolBar_exitClickHandler(event)"
+							  printClick="btToolBar_printClickHandler('05','1')"
+							  expClick="btToolBar_printClickHandler('08','0')"
+							  abandonClick="btToolBar_abandonClickHandler(event)"
+							  />
+			<controls:BarSubTitle title="科室用包申请"/>
+			
+			<s:BorderContainer width="100%"
+							   height="100%"
+							   borderStyle="solid"
+							   borderColor="#9ABBE6"
+							   backgroundColor="#E2E8E8">
+				
+				<s:VGroup id="allPanel"
+						  width="100%"
+						  height="100%"
+						  paddingLeft="5"
+						  paddingBottom="5"
+						  paddingRight="5"
+						  paddingTop="5">
+					<s:VGroup id="vgTop"
+							  verticalAlign="top"
+							  width="100%">
+
+						<s:HGroup width="100%">
+							<mx:Canvas width="50"
+									   height="53" 
+									   backgroundColor="#E2E8E8">
+								<s:RadioButton x="0"
+											   y="4" 
+											   label="蓝字"
+											   color="blue" 
+											   id="blueType" 
+											   groupName="redOrBlue" 
+											   selected="true"
+											   click="blueType_clickHandler(event)" />
+								<s:RadioButton y="30"
+											   x="0"
+											   label="红字" 
+											   color="red"
+											   id="redType" 
+											   groupName="redOrBlue"
+											   click="redType_clickHandler(event)"/>
+							</mx:Canvas>
+							<mx:VRule 
+								height="53"/>
+							<s:VGroup width="100%">
+								<s:HGroup width="100%"
+										  id="hgOne"
+										  paddingRight="2"
+										  verticalAlign="middle">
+									
+									<s:Label text="单据编号"
+											 width="56"/>
+									<s:TextInput id="billNo"
+												 width="184"
+												 maxChars="13"
+												 change="billNo_changeHandler(event)"
+												 keyUp="storageCode_keyUpHandler(event,billDate)"/>
+									
+									<s:Label text="单据日期"
+											 width="56"/>
+									<mx:DateField id="billDate"
+												  width="120"
+												  selectableRange="{{rangeStart:new Date()}}"
+												  keyUp="storageCode_keyUpHandler(event,remark)"
+												  formatString="YYYY-MM-DD"
+												  enterFrame="{billDate.selectedDate==null?billDate.selectedDate=new Date():billDate.selectedDate}"
+												  change="billDate_changeHandler(event)"/>
+									<s:Label text="申请科室"
+											 styleName="myFormItemStyle"
+											 width="56"
+											 color="blue"/>
+									<controls:TextInputIcon id="deptCode"
+															width="45%"
+															enabled="false"
+															editable="false"
+															queryIconClick="deptCode_queryIconClickHandler()"
+															keyUp="deptCode_keyUpHandler(event)"/>
+									<s:Label text="申请人"
+											 styleName="myFormItemStyle"
+											 color="blue"
+											 width="56"/>
+									<controls:TextInputIcon id="personId"
+															width="40%"
+															queryIconClick="personId_queryIconClickHandler()"
+															keyUp="personId_keyUpHandler(event)"
+															enabled="false"/>
+								</s:HGroup>
+								<s:HGroup id="hgTwo"
+										  width="100%"
+										  verticalAlign="middle"
+										  paddingRight="2">
+									<s:Label text="备    注"
+											 width="56"/>
+									<s:TextInput id="remark"
+												 width="100%"
+												 keyUp="storageCode_keyUpHandler(event,phoInputCode)"
+												 maxChars="20"
+												 change="remark_changeHandler(event)"/>
+								</s:HGroup>
+							</s:VGroup>
+						</s:HGroup>
+					
+						<!--可编辑的明细 -->
+						<s:VGroup width="100%"
+								  height="32"
+								  id="addPanel">
+							<mx:HRule width="100%"
+									  height="2"/>
+							<s:HGroup width="100%"
+									  verticalAlign="middle"
+									  height="25"
+									  paddingLeft="0"
+									  paddingRight="2">
+								<s:RadioButton id="rdoPhoCode" label="拼音简码" color="blue" groupName="rdo" value="phoCode" selected="true"/>
+								<s:RadioButton id="rdoFiveCode" label="五笔简码" color="blue" groupName="rdo" value="fiveCode"/>
+								<!--<s:TextInput id="queryNo"
+								width="80"
+								enter="packageNo_enterHandler(event)"
+								restrict="0-9a-zA-Z"/>-->
+								<dataDict:AutoCompleteMaterGrid id="phoInputCode"
+																dataFields="{['packageName','packageMode','packageUnits']}"
+																headerTexts="{['物品包名','包装方式','单位']}"
+																textAligns="{['left','left','left']}"
+																method="findCssdPackageByIntputCode2"
+																destination="commCssdServiceImpl"
+																width="80"
+																
+																restrict="a-zA-Z-0-9"
+																callback="showItemDict"
+																/>
+								<s:Label text="物品包名"/>
+								<s:TextInput id="packageName"
+											 width="150"
+											 text="@{gridDetail.selectedItem.packageName}"
+											 editable="false"/>
+								<s:Label text="包装方式"/>
+								<s:TextInput id="packageMode"
+											 width="150"
+											 text="@{gridDetail.selectedItem.packageMode}"
+											 editable="false"/>
+								<s:Label text="单位"/>
+								<s:TextInput id="packageUnits"
+											 width="60"
+											 text="@{gridDetail.selectedItem.packageUnits}"
+											 editable="false"/>
+								<s:Label text="申请数量"/>
+								<s:TextInput id="amount"
+											 width="60"
+											 restrict="0-9"
+											 text="@{gridDetail.selectedItem.amount}"
+											 change="amount_changeHandler(event)"
+											 keyDown="storageCode_keyUpHandler(event,detailRemark)"/>
+								<s:Label text="备注"/>
+								<s:TextInput id="detailRemark"
+											 width="100%"
+											 text="@{gridDetail.selectedItem.detailRemark}"
+											 change="detailRemark_changeHandler(event)"
+											 keyDown="detailRemark_keyDownHandler(event)"/>
+							</s:HGroup>
+						</s:VGroup>
+					</s:VGroup>
+					<!--表格中的明细 -->
+					<controls:SuperDataGrid id="gridDetail"
+											width="100%"
+											height="100%"
+											hasRowNo="true"
+											styleName="dataGrid"
+											allowMultipleSelection="true"
+											horizontalScrollPolicy="auto"
+											format="{[,,,,,,'0.00','0.00']}">
+						<controls:columns>
+							<mx:DataGridColumn headerText="序号"
+											   width="100"
+											   editable="false"/>
+							<mx:DataGridColumn headerText="物品包名"
+											   editable="false"
+											   textAlign="left"
+											   dataField="packageName"
+											   width="300"/>
+							<mx:DataGridColumn headerText="包装方式"
+											   dataField="packageMode"
+											   width="280"
+											   textAlign="left"
+											   editable="false"/>
+							<mx:DataGridColumn headerText="单位"
+											   dataField="packageUnits"
+											   width="220"
+											   textAlign="left"
+											   editable="false"/>
+							<mx:DataGridColumn headerText="申请数量"
+											   dataField="amount"
+											   width="80"
+											   textAlign="right"
+											   editable="false"/>
+							<mx:DataGridColumn headerText="实发数量"
+											   dataField="checkAmount"
+											   width="80"
+											   textAlign="right"
+											   editable="false"/>
+							<mx:DataGridColumn headerText="备注"
+											   dataField="detailRemark"
+											   width="80"
+											   textAlign="left"
+											   editable="false"/>
+						</controls:columns>
+					</controls:SuperDataGrid>
+					
+					<s:HGroup id="hgBottom"
+							  width="100%"
+							  verticalAlign="middle">
+						<mx:Spacer width="22%"/>
+						<!--<s:CheckBox label="自动填写丢失单据" width="22%"
+						id="selAll"
+						click="selectAll_clickHandler()"
+						/>-->
+						<mx:Spacer width="100%"/>
+						<mx:FormItem label="制单人">
+							<s:TextInput id="maker"
+										 width="100"
+										 editable="false"/>
+						</mx:FormItem>
+						<mx:FormItem label="制单日期">
+							<s:TextInput id="makeDate"
+										 width="100"
+										 editable="false"/>
+						</mx:FormItem>
+						<mx:FormItem label="审核人">
+							<s:TextInput id="verifier"
+										 width="100"
+										 editable="false"/>
+						</mx:FormItem>
+						<mx:FormItem label="审核日期">
+							<s:TextInput id="verifyDate"
+										 width="100"
+										 editable="false"/>
+						</mx:FormItem>
+					</s:HGroup>
+					<mx:Spacer height="2"/>
+				</s:VGroup>
+				
+			</s:BorderContainer>
+		</s:VGroup>
+	</s:BorderContainer>
+</mx:Module>

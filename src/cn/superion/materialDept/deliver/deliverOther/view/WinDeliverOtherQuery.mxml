@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+*		 其他出库模块-查询窗体  
+*		 author:邢树斌  2011.02.29
+*		 checked by 
+-->
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:controls="cn.superion.base.components.controls.*"
+			   width="400"
+			   height="350"
+			   backgroundColor="0xE2E8E8"
+			   title="其它出库单查找"
+			   close="returnHandler()"
+			   creationComplete="doInit()">
+	<s:layout>
+		<s:VerticalLayout paddingLeft="10"
+						  paddingRight="10"
+						  paddingTop="10"/>
+	</s:layout>
+	<fx:Declarations>
+		<mx:StringValidator id="billNoValid"
+							source="{billNo}"
+							property="text"
+							maxLength="12"
+							minLength="12"
+							required="true"
+							requiredFieldError="该项为必输"
+							tooLongError="单据编号长度应为12位"
+							tooShortError="单据编号长度应为12位"/>
+		<mx:StringValidator id="materialCodeValid"
+							source="{materialCode}"
+							property="text"
+							required="true"
+							requiredFieldError="该项为必输"/>
+	</fx:Declarations>
+	<fx:Script source="WinDeliverOtherQueryas.as"/>
+	<!-- 查询条件区 -->
+	<mx:TabNavigator width="100%"
+					 height="260"
+					 paddingBottom="15"
+					 paddingTop="15"
+					 paddingLeft="15"
+					 paddingRight="15"
+					 backgroundColor="0xE2E8E8">
+		<s:NavigatorContent width="100%"
+							height="100%"
+							label="过滤条件">
+			<s:VGroup id="queryArea"
+					  width="100%"
+					  height="212">
+				<s:HGroup width="353"
+						  verticalAlign="middle">
+					<s:Label text="出库日期"
+							 fontSize="14"/>
+					<mx:DateField width="133"
+								  id="beginBillDate"
+								  formatString="YYYY-MM-DD"
+								  keyUp="keyUpCtrl(event,endBillDate)"
+								  selectableRange="{{rangeEnd:endBillDate.selectedDate}}"
+								  enterFrame="{beginBillDate.selectedDate==null?beginBillDate.selectedDate=new Date():beginBillDate.selectedDate}"/>
+					<s:Label text="—"/>
+					<mx:DateField width="134"
+								  id="endBillDate"
+								  formatString="YYYY-MM-DD"
+								  fontSize="14"
+								  selectableRange="{{rangeStart:beginBillDate.selectedDate}}"
+								  enterFrame="{endBillDate.selectedDate==null?endBillDate.selectedDate=new Date():endBillDate.selectedDate}"
+								  keyUp="keyUpCtrl(event,storage)"/>
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  verticalAlign="middle"
+						  paddingTop="3">
+					<s:Label text="仓    库"
+							 fontSize="14"/>
+					<s:TextInput id="storage"
+									width="100%"
+								    enabled="false"
+									keyUp="keyUpCtrl(event,rdType)"/>
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  verticalAlign="middle"
+						  paddingTop="3">
+					<s:Label text="出库类别"
+							 fontSize="14"/>
+					<s:DropDownList id="rdType"
+									width="100%"
+									labelField="deliverTypeName"
+									keyUp="keyUpCtrl(event,billNo)"/>
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  verticalAlign="middle"
+						  paddingTop="3">
+					<s:Label text="出库单号"
+							 fontSize="14"/>
+					<mx:TextInput id="billNo"
+								  width="100%"
+								  keyUp="keyUpCtrl(event,materialCode)"/>
+				</s:HGroup>
+
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<s:Label text="物资编码"
+							 fontSize="14"/>
+					<controls:TextInputIcon id="materialCode"
+											width="100%"
+											height="23"
+											queryIconClick="materialCode_queryIconClickHandler(event)"
+											keyUp="keyUpCtrl(event,currentStatus)"/>
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  verticalAlign="middle"
+						  paddingTop="3">
+					<s:Label text="物资名称"
+							 fontSize="14"/>
+					<mx:TextInput id="materialName"
+								  enabled="false"
+								  width="100%"/>
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  verticalAlign="middle"
+						  paddingTop="3">
+					<s:Label text="当前状态"
+							 fontSize="14"/>
+					<s:DropDownList id="currentStatus"
+									labelField="currentStatusName"
+									selectedIndex="0"
+									dataProvider="{new ArrayCollection([
+						{currentStatus:'',currentStatusName:'全部'},
+						{currentStatus:'0',currentStatusName:'未审核'},
+						{currentStatus:'1',currentStatusName:'已审核'}])}"
+									width="100%"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:NavigatorContent>
+	</mx:TabNavigator>
+	<s:HGroup width="100%"
+			  height="31"
+			  horizontalAlign="right"
+			  verticalAlign="middle"
+			  gap="5">
+		<mx:LinkButton id="btQuery"
+					   height="26"
+					   label=" 确 定"
+					   skin="mx.skins.halo.ButtonSkin"
+					   icon="@Embed(source='assets/images/button/confirm20.png')"
+					   click="btQuery_clickHandler(event)"/>
+		<mx:LinkButton id="btReturn"
+					   height="26"
+					   label=" 取 消"
+					   skin="mx.skins.halo.ButtonSkin"
+					   icon="@Embed(source='assets/images/button/return20.png')"
+					   click="returnHandler()"/>
+	</s:HGroup>
+</s:TitleWindow>

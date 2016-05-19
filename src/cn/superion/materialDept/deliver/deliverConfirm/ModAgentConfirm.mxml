@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Module xmlns:fx="http://ns.adobe.com/mxml/2009"
+		   xmlns:s="library://ns.adobe.com/flex/spark"
+		   xmlns:mx="library://ns.adobe.com/flex/mx"
+		   layout="vertical"
+		   width="100%"
+		   height="100%"
+		   initialize="doInit()"
+		   xmlns:controls="cn.superion.base.components.controls.*"
+		   xmlns:util="cn.superion.materialDept.util.*"
+		   xmlns:dataDict="cn.superion.dataDict.*">
+	<fx:Script source="ModAgentConfirm.as"/>
+	<fx:Declarations>
+		<s:ArrayCollection id="ary">
+		</s:ArrayCollection>
+
+	</fx:Declarations>
+	<s:BorderContainer width="100%"
+					   height="100%"
+					   backgroundColor="0xE2E8E8">
+		<s:VGroup width="100%"
+				  gap="0"
+				  height="100%">
+			<util:ToolBar id="toolBar"
+						  width="100%"
+						  printClick="printClickHandler(event)"
+						  expClick="expClickHandler(event)"
+						  verifyClick="toolBar_verifyClickHandler(event)"
+						  abandonClick="toolBar_abandonClickHandler(event)"
+						  queryClick="queryClickHandler(event)"
+						  firstPageClick="firstPageClickHandler(event)"
+						  prePageClick="prePageClickHandler(event)"
+						  nextPageClick="nextPageClickHandler(event)"
+						  lastPageClick="lastPageClickHandler(event)"
+						  exitClick="exitClickHandler(event)"/>
+			<controls:BarSubTitle title="代销领用确认"/>
+			<s:BorderContainer id="_border"
+							   width="100%"
+							   height="100%"
+							   borderStyle="solid"
+							   borderColor="#9ABBE6"
+							   backgroundColor="#E2E8E8">
+
+				<s:VGroup width="100%"
+						  height="100%"
+						  paddingLeft="5"
+						  paddingBottom="5"
+						  paddingRight="5"
+						  paddingTop="5">
+
+					<s:VGroup id="patsMaster"
+							  width="100%">
+						<s:HGroup width="100%"
+								  id="h1"
+								  verticalAlign="middle">
+
+							<s:Label text="住 院 号"/>
+							<s:TextInput id="inpNo"
+										 width="20%"
+										 editable="false"/>
+							<s:Label text="姓名"/>
+							<s:TextInput id="personName"
+										 width="20%"
+										 editable="false"/>
+							<s:Label text="性别"/>
+							<s:TextInput id="sex"
+										 width="15%"
+										 editable="false"/>
+							<s:Label text="年龄"/>
+							<s:TextInput id="age"
+										 width="15%"
+										 editable="false"/>
+							<s:Label text="费别"/>
+							<s:TextInput id="chargeType"
+										 width="30%"
+										 editable="false"/>
+						</s:HGroup>
+
+
+						<s:HGroup id="h2"
+								  width="100%"
+								  verticalAlign="middle">
+							<s:Label text="科    室"/>
+							<s:TextInput id="deptCode"
+										 width="{inpNo.width}"/>
+							<s:Label text="病区"/>
+							<s:TextInput id="wardCode"
+										 editable="false"
+										 width="100%"/>
+							<s:Label text="医生"/>
+							<s:TextInput id="personIdName"
+										 editable="false"
+										 width="{age.width}"/>
+							<s:Label text="余额"/>
+							<s:TextInput id="prepaymentsLeft"
+										 textAlign="right"
+										 text="{(Number(prepaymentsLeft.text)).toFixed(2)}"
+										 editable="false"
+										 width="{chargeType.width}"/>
+						</s:HGroup>
+					</s:VGroup>
+
+
+					<s:VGroup id="patsDetail"
+							  width="100%">
+						<mx:HRule width="100%"/>
+						<s:HGroup id="_hgroup"
+								  width="100%"
+								  height="50%"
+								  verticalAlign="middle">
+							<s:Label text="物资名称"/>
+							<s:TextInput id="materialName"
+										 width="160"
+										 enabled="false"/>
+
+							<s:Label text="规格型号"/>
+							<s:TextInput id="materialSpec"
+										 width="160"
+										 enabled="false"/>
+
+							<s:Label text="单位"/>
+							<s:TextInput id="materialUnits"
+										 width="55"
+										 enabled="false"/>
+
+							<s:Label text="生产厂家"/>
+							<s:TextInput id="factoryName"
+										 width="100%"
+										 enabled="false"/>
+
+							<s:Label text="已退数量"
+									 color="blue"/>
+							<s:TextInput id="cancelAmount"
+										 width="110"
+										 restrict="0-9"
+										 textAlign="right"
+										 maxChars="6"
+										 change="textinput1_changeHandler(event)"
+										 keyDown="cancelAmount_keyDownHandler(event)"/>
+
+						</s:HGroup>
+					</s:VGroup>
+
+
+					<controls:SuperDataGrid id="dgDetail"
+											width="100%"
+											height="100%"
+											hasRowNo="true"
+											styleName="dataGrid"
+											editable="true"
+											itemClick="dgDetail_itemClickHandler()"
+											horizontalScrollPolicy="auto"
+											format="{[,,,,,,'0.00','0.00','0.00','0.00']}">
+						<controls:columns>
+							<mx:DataGridColumn headerText="序号"
+											   width="40"
+											   editable="false"/>
+							<mx:DataGridColumn headerText="条形码"
+											   width="80"
+											   editable="false"
+											   dataField="barCode"/>
+							<mx:DataGridColumn headerText="物资编码"
+											   width="110"
+											   editable="false"
+											   dataField="materialCode"/>
+							<mx:DataGridColumn headerText="物资名称"
+											   width="150"
+											   editable="false"
+											   dataField="materialName"/>
+							<mx:DataGridColumn headerText="规格型号"
+											   width="100"
+											   editable="false"
+											   dataField="materialSpec"/>
+							<mx:DataGridColumn headerText="单位"
+											   width="45"
+											   editable="false"
+											   dataField="materialUnits"/>
+							<mx:DataGridColumn headerText="申请数量"
+											   width="70"
+											   editable="false"
+											   dataField="applyAmount"
+											   textAlign="right"/>
+							<mx:DataGridColumn headerText="已退数量"
+											   width="70"
+											   editable="false"
+											   dataField="cancelAmount"
+											   labelFunction="nameSpecLBF"
+											   textAlign="right"/>
+							<mx:DataGridColumn headerText="实际使用数量"
+											   width="0"
+											   visible="false"
+											   dataField="amount"
+											   textAlign="right"/>
+							<mx:DataGridColumn headerText="售价"
+											   width="70"
+											   editable="false"
+											   dataField="retailPrice"
+											   textAlign="right"/>
+							<mx:DataGridColumn headerText="金额"
+											   width="80"
+											   editable="false"
+											   dataField="retailMoney"
+											   textAlign="right"/>
+							<mx:DataGridColumn headerText="生产厂家"
+											   editable="false"
+											   dataField="factoryName"
+											   width="180"/>
+							<mx:DataGridColumn headerText="有效期限"
+											   dataField="availDate"
+											   editable="false"
+											   width="75"/>
+							<mx:DataGridColumn headerText="批号"
+											   width="80"
+											   editable="false"
+											   dataField="batch"/>
+							<mx:DataGridColumn dataField="mainAutoId"
+											   width="110"
+											   headerText="主记录Id"
+											   editable="false"
+											   visible="false"/>
+						</controls:columns>
+					</controls:SuperDataGrid>
+					<s:HGroup id="_bottom"
+							  paddingBottom="5"
+							  paddingTop="5"
+							  verticalAlign="middle"
+							  horizontalAlign="right"
+							  width="100%">
+						<s:Label text="制单人"/>
+						<s:TextInput id="maker"
+									 width="90"
+									 editable="false"/>
+						<s:Label text="制单日期"/>
+						<s:TextInput id="makeDate"
+									 width="110"
+									 editable="false"/>
+						<s:Label text="审核人"/>
+						<s:TextInput id="verifier"
+									 width="90"
+									 editable="false"/>
+						<s:Label text="审核日期"/>
+						<s:TextInput id="verifyDate"
+									 width="110"
+									 editable="false"/>
+					</s:HGroup>
+				</s:VGroup>
+			</s:BorderContainer>
+		</s:VGroup>
+	</s:BorderContainer>
+</mx:Module>

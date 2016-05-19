@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="400"
+			   height="258"
+			   title="物资入库确认列表"
+			   close="btReturn_clickHandler()"
+			   creationComplete="doInit()"
+			   xmlns:controls="cn.superion.base.components.controls.*"
+			   backgroundColor="0xE2E8E8"
+			   fontSize="14">
+	<s:layout>
+		<s:VerticalLayout paddingBottom="5"
+						  paddingLeft="5"
+						  gap="15"
+						  paddingRight="5"
+						  paddingTop="5"/>
+	</s:layout>
+	<fx:Script source="WinReceiveQueryas.as"/>
+	<fx:Declarations>
+		<s:ArrayCollection id="aryCurrentStatus">
+			<fx:Object code="0"
+					   name="新建"/>
+			<fx:Object code="1"
+					   name="审核"/>
+			<fx:Object code="2"
+					   name="执行"/>
+			<fx:Object code="3"
+					   name="入库"/>
+		</s:ArrayCollection>
+	</fx:Declarations>
+	<mx:TabNavigator width="100%"
+					 height="180"
+					 paddingBottom="15"
+					 paddingTop="15"
+					 paddingLeft="15"
+					 paddingRight="15"
+					 backgroundColor="0xE2E8E8">
+		<s:NavigatorContent width="100%"
+							height="100%"
+							label="过滤条件">
+			<s:VGroup width="100%"
+					  height="129"
+					  verticalAlign="middle">
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<s:Label text="发放仓库"/>
+					<s:DropDownList id="storageCode"
+									selectedIndex="0"
+									width="100%"
+									height="25"
+									labelField="storageName"
+									keyUp="toNextControl(event,beginBillNo)"/>
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<s:Label text="单据编号"/>
+					<s:TextInput id="beginBillNo"
+								 width="47%"
+								 keyUp="toNextControl(event,endBillNo)"/>
+					<mx:FormItem label="-"
+								 labelWidth="10"
+								 width="53%"
+								 horizontalGap="0">
+						<s:TextInput id="endBillNo"
+									 width="100%"
+									 keyUp="toNextControl(event,beginBillDate)"/>
+					</mx:FormItem>
+				</s:HGroup>
+				<s:HGroup width="100%">
+					<s:Label text="单据日期"/>
+					<mx:DateField id="beginBillDate"
+								  width="47%"
+								  formatString="YYYY-MM-DD"
+								  enterFrame="{beginBillDate.selectedDate==null?beginBillDate.selectedDate=new Date():beginBillDate.selectedDate}"
+								  selectableRange="{{rangeEnd:endBillDate.selectedDate}}"
+								  keyUp="toNextControl(event,endBillDate)"/>
+					<mx:FormItem label="-"
+								 labelWidth="10"
+								 width="53%"
+								 horizontalGap="0">
+						<mx:DateField id="endBillDate"
+									  width="100%"
+									  formatString="YYYY-MM-DD"
+									  enterFrame="{endBillDate.selectedDate==null?endBillDate.selectedDate=new Date():endBillDate.selectedDate}"
+									  selectableRange="{{rangeStart:beginBillDate.selectedDate}}"
+									  keyUp="toNextControl(event,btConfirm)"/>
+					</mx:FormItem>
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  verticalAlign="middle"
+						  visible="false">
+					<s:Label text="当前状态"/>
+					<s:DropDownList id="currentStatus"
+									labelField="name"
+									width="100%"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:NavigatorContent>
+	</mx:TabNavigator>
+
+	<s:HGroup width="100%"
+			  horizontalAlign="right"
+			  verticalAlign="middle"
+			  height="29"
+			  gap="5">
+		<mx:LinkButton id="btConfirm"
+					   height="26"
+					   label=" 确 定"
+					   skin="mx.skins.halo.ButtonSkin"
+					   icon="@Embed(source='assets/images/button/confirm20.png')"
+					   keyUp="{if(event.keyCode!=13) return;btConfirm_clickHandler(event);}"
+					   click="btConfirm_clickHandler(event)"/>
+		<mx:LinkButton id="btReturn"
+					   height="26"
+					   label=" 取 消"
+					   skin="mx.skins.halo.ButtonSkin"
+					   icon="@Embed(source='assets/images/button/return20.png')"
+					   click="btReturn_clickHandler()"/>
+	</s:HGroup>
+</s:TitleWindow>

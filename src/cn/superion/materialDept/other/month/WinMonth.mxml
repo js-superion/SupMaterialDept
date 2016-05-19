@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	 月末结账模块
+	 author:邢树斌   2011.02.29
+	 checked by
+-->
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:util="cn.superion.material.util.*"
+			   height="400"
+			   width="630"
+			   close="btReturn_clickHandler()"
+			   title="月末结账处理"
+			   creationComplete="doInit(event)"
+			   xmlns:controls="cn.superion.base.components.controls.*">
+	<fx:Script source="WinMonthas.as"/>
+	<s:VGroup gap="0"
+			  height="100%"
+			  width="100%">
+		<s:HGroup id="queryArea"
+				  width="100%"
+				  height="50"
+				  paddingLeft="15"
+				  verticalAlign="middle"
+				  gap="8">
+			<s:Label text="仓库"/>
+			<s:TextInput id="storage"
+						 width="130"
+						 height="25"/>
+			<s:Label text="年份"/>
+			<s:ComboBox id="year"
+						width="130"
+						height="23"/>
+			<mx:Button id="btQuery"
+					   icon="@Embed('/assets/images/button/query20.png')"
+					   label=" 查询 "
+					   fontSize="12"
+					   click="btQuery_clickHandler(event)"/>
+		</s:HGroup>
+
+		<s:HGroup width="100%"
+				  paddingLeft="10"
+				  paddingRight="10"
+				  height="100%"
+				  gap="0">
+
+
+			<controls:SuperDataGrid id="gdMonthList"
+									hasRowNo="true"
+									width="100%"
+									height="100%"
+									styleName="dataGrid">
+				<controls:columns>
+					<mx:DataGridColumn headerText="月份"
+									   width="30"
+									   dataField="month"
+									   textAlign="center"/>
+
+					<mx:DataGridColumn headerText="起始日期"
+									   dataField="startDate"
+									   width="110"
+									   textAlign="left"/>
+					<mx:DataGridColumn headerText="截止日期"
+									   dataField="endDate"
+									   width="110"
+									   textAlign="left"/>
+
+					<mx:DataGridColumn headerText="是否结账"
+									   dataField="accountSign"
+									   width="50"
+									   textAlign="left"/>
+				</controls:columns>
+			</controls:SuperDataGrid>
+		</s:HGroup>
+		<s:HGroup height="49"
+				  paddingTop="10"
+				  paddingBottom="10"
+				  horizontalAlign="right"
+				  gap="5"
+				  width="100%">
+			<mx:LinkButton id="btCheck"
+						   label=" 结 账"
+						   fontSize="12"
+						   width="106"
+						   height="26"
+						   skin="mx.skins.halo.ButtonSkin"
+						   icon="@Embed(source='assets/images/button/group.png')"
+						   click="btCheck_clickHandler(event)"/>
+			<mx:LinkButton id="btCancel"
+						   label=" 取消结账"
+						   fontSize="12"
+						   width="106"
+						   height="26"
+						   skin="mx.skins.halo.ButtonSkin"
+						   icon="@Embed(source='assets/images/button/groupcel.png')"
+						   click="btCancel_clickHandler(event)"/>
+			<mx:LinkButton id="btReturn"
+						   label=" 退 出"
+						   fontSize="12"
+						   width="106"
+						   height="26"
+						   skin="mx.skins.halo.ButtonSkin"
+						   click="btReturn_clickHandler()"
+						   icon="@Embed(source='assets/images/button/return20.png')"/>
+			<mx:Spacer width="5"/>
+		</s:HGroup>
+
+
+	</s:VGroup>
+</s:TitleWindow>

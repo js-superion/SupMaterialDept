@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	 入库单据列表模块
+	 author: 芮玉红  2011.02.23
+-->
+<mx:Module xmlns:fx="http://ns.adobe.com/mxml/2009"
+		   xmlns:s="library://ns.adobe.com/flex/spark"
+		   xmlns:mx="library://ns.adobe.com/flex/mx"
+		   layout="vertical"
+		   height="100%"
+		   width="100%"
+		   horizontalScrollPolicy="auto"
+		   xmlns:controls="cn.superion.base.components.controls.*"
+		   creationComplete="doInit()"
+		   xmlns:view="cn.superion.materialDept.util.*">
+
+	<fx:Script source="ModReceiveListas.as"/>
+
+	<s:BorderContainer width="100%"
+					   height="100%"
+					   backgroundColor="0xE2E8E8"
+					   borderVisible="false">
+		<s:Scroller width="100%"
+					height="100%">
+			<s:VGroup id="vg"
+					  height="100%"
+					  width="100%"
+					  gap="0">
+				<view:ToolBar id="toolBar"
+							  width="100%"
+							  printClick="printClickHandler(event)"
+							  expClick="expClickHandler(event)"
+							  queryClick="queryClickHandler(event)"
+							  exitClick="exitClickHandler(event)"/>
+
+				<controls:BarSubTitle title="入库单据列表"/>
+
+				<controls:PageGrid id="dgReceiveList"
+								   styleName="dataGrid"
+								   height="100%"
+								   hasRowNo="true"
+								   sumField="{['outAmount','tradeMoney']}"
+								   sumLableField="rowNo"
+								   format="{[,,,,,,,'0.00','0.00','0.00']}">
+					<controls:columns>
+						<mx:DataGridColumn headerText="序号"
+										   width="40"
+										   dataField="rowNo"
+										   textAlign="left"/>
+						<mx:DataGridColumn headerText="入库单号"
+										   dataField="billNo"
+										   width="100"
+										   textAlign="left"/>
+						<mx:DataGridColumn headerText="入库日期"
+										   dataField="billDate"
+										   width="110"
+										   textAlign="left"/>
+						<mx:DataGridColumn headerText="物资编码"
+										   dataField="materialCode"
+										   width="80"
+										   textAlign="left"/>
+						<mx:DataGridColumn headerText="物资名称"
+										   dataField="materialName"
+										   width="180"
+										   textAlign="left"/>
+						<mx:DataGridColumn headerText="规格型号"
+										   dataField="materialSpec"
+										   width="100"
+										   textAlign="left"/>
+						<mx:DataGridColumn headerText="单位"
+										   dataField="materialUnits"
+										   width="40"
+										   textAlign="left"/>
+						<mx:DataGridColumn headerText="数量"
+										   dataField="amount"
+										   width="80"
+										   textAlign="right"/>
+						<mx:DataGridColumn headerText="进价"
+										   dataField="tradePrice"
+										   width="80"
+										   textAlign="right"/>
+						<mx:DataGridColumn headerText="进价金额"
+										   dataField="tradeMoney"
+										   width="100"
+										   textAlign="right"/>
+						<mx:DataGridColumn headerText="生产厂家"
+										   dataField="factoryName"
+										   width="150"
+										   textAlign="left"/>
+						<mx:DataGridColumn headerText="有效日期"
+										   dataField="availDate"
+										   width="110"
+										   textAlign="left"/>
+						<mx:DataGridColumn headerText="备注"
+										   dataField="detailRemark"
+										   width="150"
+										   textAlign="left"/>
+					</controls:columns>
+				</controls:PageGrid>
+			</s:VGroup>
+		</s:Scroller>
+	</s:BorderContainer>
+</mx:Module>
+

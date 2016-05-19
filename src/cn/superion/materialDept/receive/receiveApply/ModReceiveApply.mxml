@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Module xmlns:fx="http://ns.adobe.com/mxml/2009"
+		   xmlns:s="library://ns.adobe.com/flex/spark"
+		   xmlns:mx="library://ns.adobe.com/flex/mx"
+		   layout="vertical"
+		   height="100%"
+		   width="100%"
+		   backgroundColor="#E2E8E8"
+		   horizontalScrollPolicy="auto"
+		   xmlns:controls="cn.superion.base.components.controls.*"
+		   creationComplete="doInit()"
+		   xmlns:view="cn.superion.materialDept.util.*"
+		   xmlns:dataDict="cn.superion.dataDict.*">
+	
+	<fx:Script source="ModReceiveApplyas.as"/>
+	<fx:Declarations>
+		<s:ArrayCollection id="ary"/>
+		<!-- 药库-->
+		<s:ArrayCollection id="aryStorage">
+			<fx:Object storageCode="01"
+					   storageName="西药库"/>
+			<fx:Object storageCode="02"
+					   storageName="中药库"/>
+			<fx:Object storageCode="03"
+					   storageName="盘盈入库"/>
+			<fx:Object storageCode="04"
+					   storageName="期初入库"/>
+			<fx:Object storageCode="05"
+					   storageName="其他入库"/>
+		</s:ArrayCollection>
+		<!-- 入库类型-->
+		<s:ArrayCollection id="aryOperationType">
+			<fx:Object operationType="01"
+					   operationTypeName="普通采购"/>
+			<fx:Object operationType="02"
+					   operationTypeName="受托代销"/>
+			<fx:Object operationType="03"
+					   operationTypeName="特殊入库"/>
+		</s:ArrayCollection>
+		<s:RadioButtonGroup id="redOrBlue"
+							change="redOrBlue_changeHandler(event)"/>
+		<!--验证 -->
+		<mx:NumberValidator source="{amount}"
+							property="text"
+							integerError="必须为整数"
+							minValue="-100000"
+							maxValue="100000"
+							domain="int"
+							decimalPointCountError="非法小数点个数"
+							trigger="{amount}"
+							triggerEvent="focusOut"/>
+		<mx:NumberValidator source="{tradePrice}"
+							property="text"
+							allowNegative="false"
+							decimalPointCountError="非法小数点个数"
+							minValue="0"
+							maxValue="100000000"
+							trigger="{tradePrice}"
+							triggerEvent="focusOut">
+		</mx:NumberValidator>
+							
+	</fx:Declarations>
+		<s:Scroller width="100%"
+					height="100%">
+			<s:VGroup id="vg"
+					  gap="0"
+					  height="100%"
+					  width="100%">
+				<view:ToolBar id="toolBar"
+							  width="100%"
+							  printClick="printExpClickHandler('05','1')"
+							  expClick="printExpClickHandler('08','0')"
+							  addClick="addClickHandler(event)"
+							  modifyClick="modifyClickHandler(event)"
+							  deleteClick="deleteClickHandler(event)"
+							  saveClick="saveClickHandler(event)"
+							  verifyClick="verifyClickHandler(event)"
+							  cancelClick="cancelClickHandler(event)"
+							  addRowClick="addRowClickHandler(event)"
+							  delRowClick="delRowClickHandler(event)"
+							  queryClick="queryClickHandler(event)"
+							  firstPageClick="firstPageClickHandler(event)"
+							  prePageClick="prePageClickHandler(event)"
+							  nextPageClick="nextPageClickHandler(event)"
+							  lastPageClick="lastPageClickHandler(event)"
+							  abandonClick="abandonClickHandler(event)"
+							  exitClick="exitClickHandler(event)"/>
+				<controls:BarSubTitle title="物资领用申请"/>
+				<s:BorderContainer id="bord"
+								   width="100%"
+								   height="70"
+								   borderVisible="false"
+								   backgroundColor="#E2E8E8">
+					<s:layout>
+						<s:VerticalLayout verticalAlign="top"
+										  paddingLeft="10"
+										  paddingTop="0"/>
+					</s:layout>
+				<s:VGroup id="hgTop"
+						  gap="2"
+						  width="100%">
+						<s:HGroup id="masterGroup"
+								  width="100%"
+								  height="64">
+							<mx:Canvas width="50"
+									   height="53"
+									   backgroundColor="#E2E8E8">
+								<s:RadioButton x="0"
+											   y="4"
+											   label="蓝字"
+											   color="blue"
+											   value="1"
+											   id="blueType"
+											   groupName="redOrBlue"
+											   selected="true"/>
+								<s:RadioButton y="30"
+											   x="0"
+											   label="红字"
+											   color="red"
+											   value="2"
+											   id="redType"
+											   groupName="redOrBlue"/>
+							</mx:Canvas>
+							<mx:VRule height="53"/>
+							<s:VGroup width="100%"
+									  paddingTop="3">
+								<s:HGroup id="hg1"
+										  paddingTop="0"
+										  paddingRight="2"
+										  width="100%"
+										  verticalAlign="middle">
+									<s:Label text="供应仓库"/>
+									<s:DropDownList id="storageCode"
+													labelField="storageName"
+													width="20%"
+													change="storageCode_changeHandler(event)"
+													keyDown="toNextCtrl(event,supplyDeptCode)"
+													selectedIndex="0"/>
+									<s:Label text="供应科室" color="#0000FF" visible="false"
+											 includeInLayout="false"/>
+									<!--<controls:TextInputIcon width="30%"
+															id="supplyDeptCode"
+															queryIconClick="supplyDeptCode_queryIconClickHandler()"
+															keyDown="toNextCtrl(event,billNo)"/>-->
+									<s:TextInput width="20%" editable="false"
+															id="supplyDeptCode"
+															visible="false"
+															includeInLayout="false"
+															keyDown="toNextCtrl(event,deptCode)"/>
+									<s:Label text="申领科室"/>
+									<s:ComboBox width="20%"
+												 id="deptCode"
+												 labelField="deptName"
+												 change="deptCode_changeHandler(event)"
+												 requireSelection="true"
+												 selectedIndex="0"
+												 keyDown="toNextCtrl(event,billNo)"/>
+									<s:Label text="单据编号"/>
+									<s:TextInput width="20%" enabled="false"
+												 id="billNo"
+												 restrict="0-9"
+												 keyDown="toNextCtrl(event,billDate)"/>
+									<s:Label text="单据日期"/>
+									<mx:DateField width="10%" enabled="false"
+												  id="billDate"
+												  formatString="YYYY-MM-DD"
+												  keyDown="toNextCtrl(event,remark)"
+												  selectableRange="{{rangeEnd:new Date()}}"
+												  enterFrame="{billDate.selectedDate==null?billDate.selectedDate=new Date():billDate.selectedDate}"/>
+								</s:HGroup>
+								<s:HGroup width="100%"
+										  id="hg2"
+										  verticalAlign="middle"
+										  paddingRight="2">
+									<s:Label text="领用卡号" visible="false"
+											 includeInLayout="false"
+											 id="labCardCode"/>
+									<s:TextInput  visible="false"
+												  includeInLayout="false"
+												 id="cardCode"
+												 focusOut="cardCode_enterHandler()"/>
+									<s:Label text="账户余额" visible="false"
+											 includeInLayout="false"
+											 id="labAccountRemain"/>
+									<s:TextInput  visible="false"
+												  includeInLayout="false"
+												 editable="false"
+												 id="accountRemain"
+												 enter="{remark.setFocus();}"/>
+									<s:Label text="备　　注"/>
+									<s:TextInput id="remark"
+												 width="40%"
+												 change="{if(_materialProvideMaster)_materialProvideMaster.remark = remark.text}"
+												 keyDown="toNextCtrl(event,materialCode)"/>
+									<s:Label text="本季度限额"/>
+									<s:TextInput id="seasonLimit" editable="false" width="20%"/>
+									
+									<s:Label text="已用限额"/>
+									<s:TextInput id="usedLimit" editable="false" width="20%"/>
+									
+									<s:Label text="剩余限额"/>
+									<s:TextInput id="remainLimit" editable="false" width="20%"/>
+									
+								</s:HGroup>
+							</s:VGroup>
+						</s:HGroup>
+						<s:VGroup id="hiddenVGroup"
+								  width="100%">
+							<mx:HRule width="100%"
+									  id="hrule"
+									  height="1"/>
+							<s:HGroup paddingTop="0"
+									  width="100%"
+									  id="detailGroup"
+									  paddingRight="2"
+									  verticalAlign="middle">
+								<s:Label text="物资编码"
+										 color="#0000FF"/>
+								<controls:TextInputIcon id="materialCode"
+														width="15%"
+														keyDown="toNextCtrl(event,amount)"
+														queryIconClick="materialCode_queryIconClickHandler(event)"/>
+								<s:Label text="物资名称"/>
+								<s:TextInput width="40%"
+											 id="materialName"
+											 editable="false"/>
+								<s:Label text="规格型号"/>
+								<s:TextInput width="22%"
+											 id="materialSpec"
+											 editable="false"/>
+								<s:Label text="单　　位"/>
+								<s:TextInput width="5%"
+											 id="materialUnits"
+											 editable="false"/>
+								<s:Label text="数量"/>
+								<s:TextInput width="10%"
+											 restrict="0-9\.\-"
+											 textAlign="left"
+											 keyDown="toNextCtrl(event,tradePrice)"
+											 focusOut="amount_focusOutHandler(event)"
+											 focusIn="amount.selectAll()"
+											 change="amount_changeHandler(event)"
+											 id="amount"/>
+								<s:Label text="进价"  visible="false"
+										 includeInLayout="false"/>
+								<s:TextInput width="15%"
+											 restrict="0-9."
+											 visible="false"
+											 includeInLayout="false"
+											 editable="false"
+											 textAlign="right"
+											 id="tradePrice"/>
+								<s:TextInput width="0"
+											 restrict="0-9."
+											 visible="false"
+											 includeInLayout="false"
+											 textAlign="right"
+											 change="{dgDetail.selectedItem.tradeMoney = Number(tradeMoney.text);dgDetail.invalidateList();}"
+											 id="tradeMoney"/>
+							</s:HGroup>
+						</s:VGroup>
+				</s:VGroup>
+				</s:BorderContainer>
+				<controls:SuperDataGrid hasRowNo="true"
+										width="100%"
+										height="100%"
+										sumField="{['amount','tradeMoney']}"
+										format="{[,,,,,'0.00','0.00','0.00']}"
+										sumLableField="rowno"
+										sumRowLabelText="合计"
+										id="dgDetail"
+										editable="true"
+										itemClick="dgDetail_itemClickHandler(null)">
+					<controls:columns>
+						<mx:DataGridColumn headerText="序号"
+										   dataField="rowno"
+										   editable="false"
+										   width="0.5"/>
+						<mx:DataGridColumn headerText="物资编码"
+										   width="1.4"
+										   editable="false"
+										   dataField="materialCode"/>
+						<mx:DataGridColumn headerText="物资名称"
+										   width="2"
+										   editable="false"
+										   dataField="materialName"/>
+						<mx:DataGridColumn headerText="规格型号"
+										   width="1.5"
+										   editable="false"
+										   dataField="materialSpec"/>
+						<mx:DataGridColumn headerText="单位"
+										   width="0.4"
+										   editable="false"
+										   dataField="materialUnits"/>
+					<!--	<mx:DataGridColumn headerText="进价"
+										   width="1"
+										   editable="false"
+										   textAlign="right"
+										   dataField="tradePrice"/>-->
+						<mx:DataGridColumn headerText="申请数量"
+										   width="1"
+										   editable="false"
+										   textAlign="right"
+										   dataField="amount"/>
+						<mx:DataGridColumn headerText="审核数量"
+										   width="1"
+										   editable="false"
+										   textAlign="right"
+										   dataField="sendAmount"/>
+						<mx:DataGridColumn headerText="进价金额"
+										   width="1"
+										   editable="false"
+										   textAlign="right"
+										   dataField="tradeMoney"/>
+						<mx:DataGridColumn headerText="备注"
+										   width="1"
+										   editable="true"
+										   textAlign="left"
+										   dataField="detailRemark"/>
+					</controls:columns>
+				</controls:SuperDataGrid>
+				<s:HGroup id="hgBottom"
+						  paddingLeft="10"
+						  height="39"
+						  verticalAlign="middle">
+					<mx:FormItem label="现存量"
+								 indicatorGap="2"
+								 includeInLayout="{!isZeroDeliver}"
+								 visible="{!isZeroDeliver}">
+						<s:TextInput id="virtualAmount"
+									 width="90"
+									 editable="false"/>
+					</mx:FormItem>
+					<mx:FormItem label="制单人"
+								 indicatorGap="2">
+						<s:TextInput id="maker"
+									 width="90"
+									 editable="false"/>
+					</mx:FormItem>
+					<mx:FormItem label="制单日期"
+								 indicatorGap="2">
+						<s:TextInput id="makeDate"
+									 width="110"
+									 editable="false"/>
+					</mx:FormItem>
+
+					<mx:FormItem label="审核人"
+								 indicatorGap="2">
+						<s:TextInput id="verifier"
+									 width="90"
+									 editable="false"/>
+					</mx:FormItem>
+					<mx:FormItem label="审核日期"
+								 indicatorGap="2">
+						<s:TextInput id="verifyDate"
+									 width="110"
+									 editable="false"/>
+					</mx:FormItem>
+				</s:HGroup>
+			</s:VGroup>
+		</s:Scroller>
+	<!--</s:BorderContainer>-->
+</mx:Module>

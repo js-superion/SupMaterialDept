@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	 物资报损处理模块
+	 author:吴小娟   2011.02.25
+	 modify:吴小娟   2011.07.04
+	 checked by
+-->
+<mx:Module xmlns:fx="http://ns.adobe.com/mxml/2009"
+		   xmlns:s="library://ns.adobe.com/flex/spark"
+		   xmlns:mx="library://ns.adobe.com/flex/mx"
+		   layout="vertical"
+		   height="100%"
+		   width="100%"
+		   horizontalScrollPolicy="auto"
+		   backgroundColor="#E2E8E8"
+		   xmlns:controls="cn.superion.base.components.controls.*"
+		   creationComplete="doInit()"
+		   xmlns:util="cn.superion.materialDept.util.*">
+
+	<fx:Script source="ModRejectas.as"/>
+
+	<fx:Declarations>
+		<!--验证 -->
+		<mx:NumberValidator source="{amount}"
+							property="text"
+							integerError="必须为整数"
+							maxValue="1000"
+							domain="int"
+							decimalPointCountError="非法小数点个数"
+							trigger="{amount}"
+							triggerEvent="focusOut">
+
+		</mx:NumberValidator>
+
+	</fx:Declarations>
+	<s:Scroller id="scrol"
+				width="100%"
+				height="100%">
+
+		<s:VGroup id="vg"
+				  height="100%"
+				  width="100%"
+				  gap="0">
+			<util:ToolBar id="toolBar"
+						  width="100%"
+						  printClick="printClickHandler(event)"
+						  expClick="expClickHandler(event)"
+						  addClick="addClickHandler(event)"
+						  modifyClick="modifyClickHandler(event)"
+						  deleteClick="deleteClickHandler(event)"
+						  saveClick="saveClickHandler(event)"
+						  cancelClick="cancelClickHandler(event)"
+						  verifyClick="verifyClickHandler(event)"
+						  addRowClick="addRowClickHandler(event)"
+						  delRowClick="delRowClickHandler(event)"
+						  queryClick="queryClickHandler(event)"
+						  firstPageClick="firstPageClickHandler(event)"
+						  prePageClick="prePageClickHandler(event)"
+						  nextPageClick="nextPageClickHandler(event)"
+						  lastPageClick="lastPageClickHandler(event)"
+						  exitClick="exitClickHandler(event)"/>
+			<controls:BarSubTitle title="物资报损处理"/>
+			<s:HGroup id="hgTop"
+					  gap="2"
+					  width="100%">
+				<s:BorderContainer id="bord"
+								   width="100%"
+								   height="111"
+								   backgroundColor="#E2E8E8"
+								   borderVisible="false">
+					<s:layout>
+						<s:VerticalLayout verticalAlign="top"
+										  paddingLeft="5"/>
+					</s:layout>
+					<s:HGroup id="masterGroup"
+							  width="100%"
+							  height="60">
+						<s:VGroup width="100%"
+								  height="100%"
+								  paddingTop="5"
+								  paddingBottom="5"
+								  paddingRight="5">
+							<s:HGroup id="hg1"
+									  width="100%"
+									  verticalAlign="middle">
+								<s:Label text="仓　  库"/>
+								<s:TextInput id="storageCode"
+											 width="17%"
+											 enabled="false"/>
+								<s:Label text="报损单号"/>
+								<s:TextInput id="billNo"
+											 width="20%"
+											 maxChars="30"
+											 keyDown="toNextCtrl(event,billDate)"/>
+								<s:Label id="billDateText"
+										 text="报损日期"/>
+								<mx:DateField id="billDate"
+											  width="15%"
+											  fontSize="14"
+											  formatString="YYYY-MM-DD"
+											  showToday="true"
+											  selectableRange="{{rangeEnd:new Date()}}"
+											  enterFrame="{billDate.selectedDate==null?billDate.selectedDate=new Date():billDate.selectedDate}"
+											  keyDown="toNextCtrl(event,outDeptCode)"/>
+								<s:Label text="报损部门"
+										 color="#0000FF"/>
+								<controls:TextInputIcon id="outDeptCode"
+														width="33%"
+														queryIconClick="outDeptCode_queryIconClickHandler(event)"
+														keyDown="toNextCtrl(event,personId)"/>
+								<s:Label text="经手人"
+										 color="#0000FF"/>
+								<controls:TextInputIcon id="personId"
+														width="15%"
+														queryIconClick="personId_queryIconClickHandler(event)"
+														keyDown="toNextCtrl(event,materialCode)"/>
+							</s:HGroup>
+							<s:HGroup id="hg2"
+									  width="100%"
+									  verticalAlign="middle">
+								<s:Label text="出库类别"/>
+								<controls:TextInputIcon id="rdType"
+														maxChars="30"
+														queryIconClick="rdType_queryIconClickHandler(event)"
+														keyDown="toNextCtrl(event,rejectReason)"/>
+								<s:Label text="报损原因"/>
+								<s:TextInput id="rejectReason"
+											 maxChars="40"
+											 keyDown="toNextCtrl(event,remark)"/>
+
+								<s:Label text="备　　注"/>
+								<s:TextInput id="remark"
+											 width="100%"
+											 maxChars="20"
+											 keyDown="toNextCtrl(event,materialCode)"/>
+							</s:HGroup>
+						</s:VGroup>
+					</s:HGroup>
+
+					<s:VGroup id="hiddenVGroup"
+							  width="100%"
+							  paddingTop="5"
+							  paddingBottom="5"
+							  paddingRight="5">
+						<mx:HRule id="hrule1"
+								  width="100%"
+								  height="1"/>
+						<s:HGroup width="100%"
+								  verticalAlign="middle">
+							<s:Label text="物资编码"
+									 color="#0000FF"/>
+							<controls:TextInputIcon id="materialCode"
+													width="17%"
+													keyDown="toNextCtrl(event,amount)"
+													queryIconClick="materialCode_queryIconClickHandler(event)"/>
+							<s:Label text="物资名称"/>
+							<s:TextInput id="materialName"
+										 width="33%"
+										 enabled="false"/>
+							<s:Label text="规格型号"/>
+							<s:TextInput id="materialSpec"
+										 width="24%"
+										 enabled="false"/>
+							<s:Label text="单位"/>
+							<s:TextInput id="materialUnits"
+										 width="7%"
+										 enabled="false"/>
+							<s:Label text="数量"
+									 color="#0000FF"/>
+							<s:TextInput id="amount"
+										 width="10%"
+										 restrict="0-9."
+										 focusIn="amount.selectAll();amount_ChangeHandler(event)"
+										 change="amount_ChangeHandler(event)"
+										 keyDown="toNextCtrl(event,batch)"/>
+							<s:Label text="批号"
+									 color="#0000FF"/>
+							<controls:TextInputIcon id="batch"
+													width="14%"
+													textChange="batch_changeHandler(event)"
+													keyDown="toNextCtrl(event,materialCode)"
+													queryIconClick="batch_queryIconClickHandler(event)"/>
+						</s:HGroup>
+						<mx:HRule id="hrule2"
+								  width="100%"
+								  height="1"/>
+					</s:VGroup>
+				</s:BorderContainer>
+			</s:HGroup>
+
+			<controls:SuperDataGrid id="gdRejectDetail"
+									width="100%"
+									height="100%"
+									top="5"
+									hasRowNo="true"
+									sumField="{['amount','retailMoney']}"
+									sumLableField="rowno"
+									sumRowLabelText="合计"
+									styleName="dataGrid"
+									isAutoFetchDictData="false"
+									format="{[,,,,,'0.00','0.00','0.00']}"
+									itemClick="gdRejectDetail_itemClickHandler(event)">
+				<controls:columns>
+					<mx:DataGridColumn headerText="序号"
+									   width="40"
+									   dataField="rowno"/>
+					<mx:DataGridColumn headerText="物资编码"
+									   width="90"
+									   dataField="materialCode"
+									   textAlign="left"/>
+					<mx:DataGridColumn headerText="物资名称"
+									   width="220"
+									   dataField="materialName"
+									   textAlign="left"/>
+					<mx:DataGridColumn headerText="规格型号"
+									   width="150"
+									   dataField="materialSpec"
+									   textAlign="left"/>
+					<mx:DataGridColumn headerText="单位"
+									   width="60"
+									   dataField="materialUnits"
+									   textAlign="left"/>
+					<mx:DataGridColumn headerText="数量"
+									   width="80"
+									   dataField="amount"
+									   textAlign="right"
+									   color="#0000FF"/>
+					<mx:DataGridColumn headerText="售价"
+									   width="90"
+									   dataField="retailPrice"
+									   textAlign="right"/>
+					<mx:DataGridColumn headerText="售价金额"
+									   width="100"
+									   dataField="retailMoney"
+									   textAlign="right"/>
+					<mx:DataGridColumn headerText="批号"
+									   width="100"
+									   dataField="batchName"
+									   textAlign="left"
+									   labelFunction="batchLBF"
+									   color="#0000FF"/>
+					<mx:DataGridColumn headerText="有效期至"
+									   width="100"
+									   dataField="availDate"
+									   textAlign="left"/>
+					<mx:DataGridColumn headerText="生产厂家"
+									   width="200"
+									   dataField="factoryName"
+									   textAlign="left"
+									   labelFunction="factoryLBF"/>
+				</controls:columns>
+			</controls:SuperDataGrid>
+
+			<s:HGroup paddingLeft="10"
+					  height="39"
+					  gap="10"
+					  verticalAlign="middle">
+				<mx:FormItem label="制单人"
+							 indicatorGap="2">
+					<s:TextInput id="maker"
+								 width="90"
+								 enabled="false"/>
+				</mx:FormItem>
+				<mx:FormItem label="制单日期"
+							 indicatorGap="2">
+					<s:TextInput id="makeDate"
+								 width="110"
+								 enabled="false"/>
+				</mx:FormItem>
+
+				<mx:FormItem label="审核人"
+							 indicatorGap="2">
+					<s:TextInput id="verifier"
+								 width="90"
+								 enabled="false"/>
+				</mx:FormItem>
+				<mx:FormItem label="审核日期"
+							 indicatorGap="2">
+					<s:TextInput id="verifyDate"
+								 width="110"
+								 enabled="false"/>
+				</mx:FormItem>
+			</s:HGroup>
+		</s:VGroup>
+	</s:Scroller>
+</mx:Module>

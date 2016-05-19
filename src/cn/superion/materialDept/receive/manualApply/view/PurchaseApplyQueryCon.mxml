@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:controls="cn.superion.base.components.controls.*"
+			   width="500"
+			   height="296"
+			   backgroundColor="0xE2E8E8"
+			   title="特殊申请单查找"
+			   close="returnHandler()">
+	<s:layout>
+		<s:VerticalLayout paddingLeft="10"
+						  paddingRight="10"
+						  paddingTop="10"
+						  paddingBottom="10"/>
+	</s:layout>
+	<fx:Script source="PurchaseApplyQueryConas.as"/>
+	<fx:Style>
+		@namespace s "library://ns.adobe.com/flex/spark";
+		@namespace mx "library://ns.adobe.com/flex/mx";
+		@namespace controls "cn.superion.base.components.controls.*";
+		@namespace util "cn.superion.material.util.*";
+		.myFormItemStyle{
+			color:blue
+		}
+	</fx:Style>
+	<!-- 查询条件区 -->
+	<mx:TabNavigator width="478"
+					 height="100%"
+					 paddingBottom="15"
+					 paddingTop="15"
+					 paddingLeft="15"
+					 paddingRight="15"
+					 backgroundColor="0xE2E8E8">
+		<s:NavigatorContent width="450"
+							height="100%"
+							label="过滤条件">
+			<s:VGroup id="drugInQuery"
+					  width="100%"
+					  height="100%"
+					  verticalAlign="middle">
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<s:Label text="单据编号"
+							 width="75"/>
+					<s:TextInput id="billNoFrom"
+								 width="47%"
+								 maxChars="20"
+								 keyUp="toNextControl(event,billNoTo)"/>
+					<mx:FormItem label="-"
+								 labelWidth="10"
+								 width="53%"
+								 horizontalGap="0">
+						<s:TextInput id="billNoTo"
+									 width="100%"
+									 maxChars="20"
+									 keyUp="toNextControl(event,isBillDate)"/>
+					</mx:FormItem>
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<mx:FormItem direction="horizontal"
+								 width="100%"
+								 indicatorGap="0">
+						<s:CheckBox id="isBillDate"
+									label="单据日期"
+									width="75"
+									keyUp="toNextControl(event,billDateFrom)"/>
+						<mx:DateField id="billDateFrom"
+									  keyUp="toNextControl(event,billDateTo)"
+									  width="43%"
+									  enabled="{isBillDate.selected}"
+									  formatString="YYYY-MM-DD"
+									  enterFrame="{billDateFrom.selectedDate==null?billDateFrom.selectedDate=new Date():billDateFrom.selectedDate}"
+									  selectableRange="{{rangeEnd:billDateTo.selectedDate}}"/>
+						<mx:FormItem label="-"
+									 fontSize="14"
+									 labelWidth="10"
+									 width="50%"
+									 horizontalGap="0">
+							<mx:DateField id="billDateTo"
+										  width="100%"
+										  enabled="{isBillDate.selected}"
+										  formatString="YYYY-MM-DD"
+										  enterFrame="{billDateTo.selectedDate==null?billDateTo.selectedDate=new Date():billDateTo.selectedDate}"
+										  selectableRange="{{rangeStart:billDateFrom.selectedDate}}"/>
+						</mx:FormItem>
+					</mx:FormItem>
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<mx:FormItem direction="horizontal"
+								 width="100%"
+								 indicatorGap="0">
+					</mx:FormItem>
+				</s:HGroup>
+
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<s:Label text="当前状态"
+							 width="75"/>
+					<s:DropDownList id="currentStatus"
+									labelField="currentStatusName"
+									selectedIndex="0"
+									height="25"
+									dataProvider="{new ArrayCollection([
+									{currentStatus:'0',currentStatusName:'新建状态'},
+									{currentStatus:'2',currentStatusName:'提交'},
+									{currentStatus:'3,4',currentStatusName:'审批中'}])}"
+									width="100%"
+									keyUp="toNextControl(event,btQuery)">
+					</s:DropDownList>
+				</s:HGroup>
+			</s:VGroup>
+		</s:NavigatorContent>
+	</mx:TabNavigator>
+	<s:HGroup width="100%"
+			  height="29"
+			  horizontalAlign="right"
+			  verticalAlign="middle"
+			  gap="5">
+		<mx:LinkButton id="btQuery"
+					   height="26"
+					   label=" 确 定"
+					   skin="mx.skins.halo.ButtonSkin"
+					   icon="@Embed(source='/assets/images/button/confirm20.png')"
+					   click="btQuery_clickHandler(event)"
+					   keyUp="btQuery_clickHandler(event)"/>
+		<mx:LinkButton id="btReturn"
+					   height="26"
+					   label=" 取消"
+					   skin="mx.skins.halo.ButtonSkin"
+					   icon="@Embed(source='/assets/images/button/return20.png')"
+					   click="returnHandler()"/>
+	</s:HGroup>
+</s:TitleWindow>

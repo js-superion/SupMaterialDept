@@ -1,0 +1,399 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+简单字典窗体
+-->
+<s:TitleWindow width="556"
+			   height="600"
+			   xmlns:mdi="http://code.google.com/p/flexlib/"
+			   xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   backgroundColor="0xE2E8E8"
+			   xmlns:container="cn.superion.base.components.container.*"
+			   xmlns:controls="cn.superion.base.components.controls.*"
+			   creationComplete="doInit()"
+			   close="closeWin(event)">
+	<fx:Script>
+		<![CDATA[
+			import cn.superion.base.config.BaseDict;
+			import cn.superion.base.config.ParameterObject;
+			import cn.superion.base.config.SimpleDictWinConfig;
+			import cn.superion.base.util.FormUtils;
+			import cn.superion.base.util.ObjectUtils;
+			import cn.superion.base.util.StringUtils;
+			
+			import mx.collections.ArrayCollection;
+			import mx.containers.FormItem;
+			import mx.controls.Alert;
+			import mx.controls.RadioButton;
+			import mx.controls.TextInput;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ListEvent;
+			import mx.managers.PopUpManager;
+			
+			import spark.components.ComboBox;
+			import spark.components.DropDownList;
+			import spark.events.IndexChangeEvent;
+			
+			//字典配置对象
+			public var dictWinConfig:SimpleDictWinConfig;
+			//查询输入文本框
+			public var txtQuery:TextInput;
+			private var comApplyRange:ComboBox;
+			public var isShareObj:Boolean=true;
+			
+			/**
+			 * 初始化
+			 * */
+			public function doInit():void
+			{
+				this.title=dictWinConfig.typeName + '字典';
+				FormUtils.createComHeader(dictGrid.grid, dictWinConfig.gridDataFields, dictWinConfig.gridHeadTexts, dictWinConfig.widths);				
+				createQueryOptionRadio();
+				initGrid();
+				this.setFocus();
+				txtQuery.setFocus();
+			}
+			
+			
+			private function getApplyRangeInSo():Object{
+				var so:SharedObject=SharedObject.getLocal("suphis-config", "/");
+				var value:Object='';
+				if (so.data.applyRange)
+				{
+					var labelField:Object=dictWinConfig.comboxLableField || 'label';
+					value=so.data.applyRange.data
+				}else{
+					value=(dictWinConfig.comboxData||[{data:''}]).data
+				}
+				return value;
+			}
+			
+			/**
+			 * 初始表格
+			 * */
+			private function initGrid():void
+			{
+				var passParams:ParameterObject=new ParameterObject();
+				var destination:String=dictWinConfig.destination;
+				var method:String=dictWinConfig.method;
+				
+				passParams.conditions={entityClassName: dictWinConfig.entityClassName, serverOrderField: dictWinConfig.serverOrderField};
+				if(isShareObj){
+					passParams.conditions['comboValue']=getApplyRangeInSo()
+				}
+				
+				if (dictWinConfig.baseCondition)
+				{
+					ObjectUtils.mergeObject(dictWinConfig.baseCondition, passParams.conditions);
+				}
+				//2011.07.12 周作建  自动加载
+				if (comApplyRange)
+				{
+					dictGrid.config(passParams, destination, method, null, dictWinConfig.extParam, true);
+				}
+				else
+				{
+					dictGrid.config(passParams, destination, method, null, dictWinConfig.extParam, false);
+				}
+			}
+			
+			/**
+			 * 创建查询方式选择单选按钮
+			 * */
+			private function createQueryOptionRadio():void
+			{
+				var lstrCurInputCode:String=BaseDict.getDefaultInputType();
+				lstrCurInputCode.toLowerCase()
+				var index:int=0;
+				var firstOption:RadioButton=null;
+				var lisDirty:Boolean=false;
+				for each (var it:Object in dictWinConfig.gridDataQueryOption)
+				{
+					var option:RadioButton=new RadioButton();
+					option.label=it.label;
+					option.value=it.field;
+					firstOption=option;
+					if ((lstrCurInputCode.toLowerCase().indexOf('five') > -1 && it.field.toLowerCase().indexOf('five') > -1) || (lstrCurInputCode.toLowerCase().indexOf('pho') > -1 && it.field.toLowerCase().indexOf('pho') > -1))
+					{
+						option.selected=true;
+						lisDirty=true;
+					}
+					option.groupName="queryType";
+					queryCon.addElementAt(option, index);
+					index++;
+				}
+				if (!lisDirty && firstOption)
+				{
+					firstOption.selected=true;
+				}
+				txtQuery=new TextInput();
+				txtQuery.id="txtQuery";
+				txtQuery.text=dictWinConfig.initQueryValue;
+				txtQuery.imeMode=IMEConversionMode.ALPHANUMERIC_HALF;
+				txtQuery.addEventListener(KeyboardEvent.KEY_UP, queryItemHandler);
+				txtQuery.addEventListener(Event.CHANGE, queryItemHandler);
+				queryCon.addElementAt(txtQuery, index);
+				if (dictWinConfig.comboxData)
+				{
+					var fi:FormItem=new FormItem()
+					fi.label=dictWinConfig.comboxFormItemLable
+					comApplyRange=new ComboBox();
+					comApplyRange.addEventListener(FlexEvent.CREATION_COMPLETE, function():void
+					{
+						comApplyRange.textInput.editable=false;
+						if(isShareObj){
+							selectComApplyRangeBySo();
+						}
+						
+						comApplyRange.height=23;
+					})
+					comApplyRange.addEventListener(ListEvent.CHANGE, function(e:IndexChangeEvent):void
+					{
+						if(isShareObj){
+							setComApplyRangeValueToSo(comApplyRange.selectedItem)
+						}
+						queryByCombox(comApplyRange.selectedItem);
+						
+					})
+					comApplyRange.width=80;
+					comApplyRange.dataProvider=new ArrayCollection(dictWinConfig.comboxData)
+					if (dictWinConfig.comboxLableField)
+					{
+						comApplyRange.labelField=dictWinConfig.comboxLableField
+					}
+					comApplyRange.selectedIndex=0;
+					queryByCombox(comApplyRange.selectedItem);
+					fi.addElement(comApplyRange)
+					queryCon.addElementAt(fi, 0);
+				}
+			}
+			
+			private function setComApplyRangeValueToSo(item:Object):void
+			{
+				var so:SharedObject=SharedObject.getLocal("suphis-config", "/");
+				so.data.applyRange=item
+			}
+			
+			private function queryByCombox(item:Object):void
+			{
+				var queryKey:String=txtQuery.text;
+				var field:Object=queryType.selectedValue;
+				var value:String=StringUtils.Trim(queryKey);
+				var timer:Timer=new Timer(100, 1);
+				timer.addEventListener(TimerEvent.TIMER, function(et:Event):void
+				{
+					queryKey=txtQuery.text;
+					if (value == StringUtils.Trim(queryKey))
+					{
+						queryData(field, value);
+					}
+				})
+				timer.start();
+			}
+			
+			private function selectComApplyRangeBySo():void
+			{
+				var so:SharedObject=SharedObject.getLocal("suphis-config", "/");
+				var lable:Object=null;
+				if (so.data.applyRange)
+				{
+					var labelField:Object=dictWinConfig.comboxLableField || 'label';
+					lable=so.data.applyRange[labelField];
+					FormUtils.selectComboItem(comApplyRange, dictWinConfig.comboxLableField, lable);
+					return;
+				}
+			}
+			
+			/**
+			 * 完成选择
+			 * */
+			private function selItem():void
+			{
+				if (!dictGrid.grid.selectedItem)
+				{
+					return;
+				}
+				if (!dictWinConfig.isReturnArray)
+				{
+					dictWinConfig.callback(dictGrid.grid.selectedItem);
+				}
+				else
+				{
+					dictWinConfig.callback(dictGrid.grid.selectedItems);
+				}
+				PopUpManager.removePopUp(this);
+			}
+			
+			/**
+			 * 关闭当前字典窗体
+			 * */
+			private function closeWin(event:Event):void
+			{
+				PopUpManager.removePopUp(this);
+			}
+			
+			/**
+			 *
+			 * 用户输入相应事件方法，通过用户输入的值查询字典数据
+			 * */
+			private function queryItemHandler(ek:*=null):void
+			{
+				if (ek is KeyboardEvent)
+				{
+					if(ek.keyCode == Keyboard.ENTER){
+						if(dictGrid.grid.dataProvider.length>0){
+							selItem();	
+							return
+						}
+					}
+					if (ek.keyCode == Keyboard.DOWN)
+					{
+						this.setFocus();
+						dictGrid.grid.setFocus();
+						if((dictGrid.grid.selectedIndex+1)<dictGrid.grid.dataProvider.length){
+							dictGrid.grid.selectedIndex=dictGrid.grid.selectedIndex+1
+						}
+						return;
+					}
+				}
+				else
+				{
+					if (ek != null)
+					{
+						txtQuery.setFocus();
+						txtQuery.selectionBeginIndex=txtQuery.text.length
+						txtQuery.selectionEndIndex=txtQuery.text.length
+					}
+				}
+				var queryKey:String=txtQuery.text;
+				var field:Object=queryType.selectedValue;
+				var value:String=StringUtils.Trim(queryKey);
+				
+				var timer:Timer=new Timer(100, 1);
+				timer.addEventListener(TimerEvent.TIMER, function(et:Event):void
+				{
+					queryKey=txtQuery.text;
+					if (value == StringUtils.Trim(queryKey))
+					{
+						queryData(field, value);
+					}
+				})
+				timer.start();
+			}
+			
+			/**
+			 * 通过用户输入的内容重新更新表格
+			 * @parameters field 查询字段
+			 *             value 输入值
+			 * */
+			private function queryData(field:Object, value:Object):void
+			{
+				var param:ParameterObject=new ParameterObject();
+				param.page=1;
+				param.itemsPerPage=1000;
+				var sql:String=" where " + field + " like '" + value + "%'";
+				param.conditionSql=sql;
+				param.conditions={entityClassName: dictWinConfig.entityClassName, serverOrderField: dictWinConfig.serverOrderField};
+				param.conditions[field]=value;
+				if (comApplyRange)
+				{
+					param.conditions['comboValue']=comApplyRange.selectedItem.data;
+				}
+				if (dictWinConfig.baseCondition)
+				{
+					ObjectUtils.mergeObject(dictWinConfig.baseCondition, param.conditions);
+				}
+				dictGrid.reQuery(param, dictWinConfig.extParam);
+			}
+			
+			protected function queryType_changeHandler(event:Event):void
+			{
+				// TODO Auto-generated method stub
+				txtQuery.text='';
+				txtQuery.setFocus();
+			}
+			
+			protected function dictGrid_keyUpHandler(event:KeyboardEvent):void
+			{
+				if (event.keyCode == Keyboard.ENTER)
+				{
+					selItem();
+				}
+			}
+			
+			protected function btQuery_clickHandler(event:MouseEvent):void
+			{
+				queryItemHandler();
+			}
+		]]>
+	</fx:Script>
+	<s:VGroup width="100%"
+			  height="100%"
+			  horizontalAlign="center"
+			  paddingLeft="5"
+			  paddingRight="5"
+			  gap="2">
+		<mx:HBox width="100%"
+				 height="29"
+				 paddingTop="5">
+			<mx:HBox id="queryCon"
+					 width="100%">
+				<mx:LinkButton id="btQuery"
+							   height="22"
+							   label="查 找"
+							   fontSize="12"
+							   fontFamily="宋体"
+							   skin="mx.skins.halo.ButtonSkin"
+							   click="btQuery_clickHandler(event)"
+							   icon="@Embed(source='assets/images/button/query20.png')"/>
+			</mx:HBox>
+			
+			<mx:RadioButtonGroup id="queryType"
+								 change="queryType_changeHandler(event)">
+			</mx:RadioButtonGroup>
+		</mx:HBox>
+		<!-- 数据表格显示-->
+		<controls:PageGrid id="dictGrid"
+						   width="100%"
+						   height="100%"
+						   doubleClickEnabled="true"
+						   isOnlyButton="true"
+						   toolTip="双击一行确认选择"
+						   itemDoubleClick="selItem()"
+						   keyUp="dictGrid_keyUpHandler(event)">
+			<controls:columns>
+				<mx:DataGridColumn headerText="代码"
+								   dataField="code"/>
+				<mx:DataGridColumn headerText="名称"
+								   dataField="name"/>
+			</controls:columns>
+		</controls:PageGrid>
+		<!-- 操作按钮区 -->
+		<mx:Spacer height="2"/>
+		<s:HGroup id="bbar"
+				  width="100%"
+				  height="30">
+			<mx:Spacer width="100%"/>
+			<mx:Button height="25"
+					   width="86"
+					   click="selItem()"
+					   fontSize="12"
+					   fontFamily="宋体"
+					   label="确 认"
+					   skin="mx.skins.halo.ButtonSkin"
+					   icon="@Embed(source='assets/images/button/confirm20.png')"/>
+			<mx:Button height="25"
+					   width="86"
+					   click="closeWin(event)"
+					   fontSize="12"
+					   fontFamily="宋体"
+					   label="关 闭"
+					   skin="mx.skins.halo.ButtonSkin"
+					   icon="@Embed(source='assets/images/button/cancel20.png')"/>
+		</s:HGroup>
+		<mx:Spacer height="4"/>
+	</s:VGroup>
+	
+</s:TitleWindow>

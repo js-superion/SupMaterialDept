@@ -7,7 +7,8 @@ Desktop.ini
 
 # Recycle Bin used on file shares
 $RECYCLE.BIN/
-
+html-template/
+src/assets/
 # Windows Installer files
 *.cab
 *.msi
@@ -45,3 +46,10 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+*.jpg
+*.swc
+*.actionScriptProperties
+.flexProperties
+*.project
+.settings/org.eclipse.core.resources.prefs
+*.txt

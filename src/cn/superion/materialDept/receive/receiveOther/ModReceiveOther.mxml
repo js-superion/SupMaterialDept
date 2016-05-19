@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	 其他入库处理模块
+	 author:吴小娟   2011.02.23
+	 checked by
+-->
+<mx:Module xmlns:fx="http://ns.adobe.com/mxml/2009"
+		   xmlns:s="library://ns.adobe.com/flex/spark"
+		   xmlns:mx="library://ns.adobe.com/flex/mx"
+		   layout="vertical"
+		   width="100%"
+		   height="100%"
+		   xmlns:controls="cn.superion.base.components.controls.*"
+		   creationComplete="doInit()"
+		   xmlns:dataDict="cn.superion.dataDict.*"
+		   xmlns:util="cn.superion.materialDept.util.*">
+
+	<fx:Script source="ModReceiveOtheras.as"/>
+
+	<fx:Declarations>
+		<s:RadioButtonGroup id="invoiceType"
+							change="invoiceType_changeHandler(event)"/>
+	</fx:Declarations>
+	<s:BorderContainer width="100%"
+					   height="100%"
+					   backgroundColor="0xE2E8E8"
+					   borderVisible="false">
+		<s:VGroup width="100%"
+				  height="100%"
+				  gap="0">
+			<util:MainToolBar id="btToolBar"
+							  width="100%"
+							  printClick="btToolBar_printExpClickHandler('05','1')"
+							  expClick="btToolBar_printExpClickHandler('08','0')"
+							  addClick="btToolBar_addClickHandler(event)"
+							  modifyClick="btToolBar_modifyClickHandler(event)"
+							  deleteClick="btToolBar_deleteClickHandler(event)"
+							  saveClick="btToolBar_saveClickHandler(event)"
+							  cancelClick="btToolBar_cancelClickHandler(event)"
+							  verifyClick="btToolBar_verifyClickHandler(event)"
+							  addRowClick="btToolBar_addRowClickHandler(event)"
+							  delRowClick="btToolBar_delRowClickHandler(event)"
+							  queryClick="btToolBar_queryClickHandler(event)"
+							  exitClick="btToolBar_exitClickHandler(event)"/>
+			<controls:BarSubTitle title="其他入库处理"/>
+			<s:BorderContainer id="bord"
+							   width="100%"
+							   height="100%"
+							   borderStyle="solid"
+							   borderColor="#9ABBE6"
+							   backgroundColor="#E2E8E8">
+				<s:VGroup id="allPanel"
+						  width="100%"
+						  height="100%"
+						  paddingLeft="5"
+						  paddingBottom="5"
+						  paddingRight="5"
+						  paddingTop="5">
+					<s:HGroup id="masterPanel"
+							  width="100%"
+							  verticalAlign="middle">
+						<mx:Canvas width="50"
+								   height="53"
+								   backgroundColor="#E2E8E8">
+							<s:RadioButton id="invoiceType1"
+										   label="蓝字"
+										   color="blue"
+										   groupName="invoiceType"
+										   x="0"
+										   y="4"
+										   click="invoiceType_clickHandler(event)"/>
+							<s:RadioButton id="invoiceType2"
+										   label="红字"
+										   color="red"
+										   groupName="invoiceType"
+										   x="0"
+										   y="30"
+										   click="invoiceType_clickHandler(event)"/>
+						</mx:Canvas>
+						<mx:VRule width="10"
+								  height="53"/>
+						<s:VGroup width="100%">
+							<s:HGroup width="100%"
+									  verticalAlign="middle">
+								<mx:FormItem label="仓　库"
+											 width="162">
+									<s:TextInput id="storageCode"
+												 width="107"
+												 enabled="false"/>
+									<!--<s:DropDownList id="storageCode"
+										 width="107"
+										 labelField="storageName"
+										 selectedIndex="0"
+										 requireSelection="true"
+										 keyUp="toNextControl(event,rdType)"/>-->
+								</mx:FormItem>
+								<mx:FormItem label="入库类别">
+									<s:DropDownList id="rdType"
+													width="140"
+													enabled="false"
+													labelField="receviceTypeName"
+													selectedIndex="0"
+													requireSelection="true"
+													dataProvider="{new ArrayCollection([{receviceType:'102', receviceTypeName:'盘盈入库'},
+										{receviceType:'109', receviceTypeName:'其他入库'}])}"/>
+								</mx:FormItem>
+								<mx:FormItem label="入库单号">
+									<s:TextInput id="billNo"
+												 width="120"
+												 maxChars="30"
+												 restrict="0-9"
+												 keyUp="toNextControl(event,billDate)"/>
+								</mx:FormItem>
+								<mx:FormItem label="入库日期">
+									<mx:DateField id="billDate"
+												  width="111"
+												  formatString="YYYY-MM-DD"
+												  enterFrame="{billDate.selectedDate==null?billDate.selectedDate=new Date():billDate.selectedDate}"
+												  keyUp="toNextControl(event,deptCode)"/>
+								</mx:FormItem>
+								<mx:FormItem label="业务类型"
+											 width="100%">
+									<s:TextInput id="operationType"
+												 width="100%"
+												 enabled="false"/>
+								</mx:FormItem>
+							</s:HGroup>
+							<s:HGroup width="100%"
+									  verticalAlign="middle">
+								<mx:FormItem label="业务号">
+									<s:TextInput id="operationNo"
+												 width="107"
+												 enabled="false"/>
+								</mx:FormItem>
+								<s:Label text="部　　门"
+										 width="63"
+										 paddingLeft="6"/>
+								<controls:TextInputIcon id="deptCode"
+														width="140"
+														maxChars="20"
+														queryIconClick="deptCode_queryIconClickHandler()"
+														keyUp="textInputIcon_keyUpHandler(event,personId)"/>
+								<s:Label text="业 务 员"
+										 width="60"
+										 paddingLeft="2"/>
+								<controls:TextInputIcon id="personId"
+														width="120"
+														maxChars="10"
+														queryIconClick="personId_queryIconClickHandler()"
+														keyUp="textInputIcon_keyUpHandler(event,remark)"/>
+								<mx:FormItem label="备　　注"
+											 width="100%">
+									<s:TextInput id="remark"
+												 width="100%"
+												 maxChars="20"
+												 restrict="^ "
+												 keyUp="toNextControl(event,phoInputCode)"/>
+								</mx:FormItem>
+							</s:HGroup>
+						</s:VGroup>
+					</s:HGroup>
+					<s:VGroup id="addPanel"
+							  width="100%">
+						<mx:HRule width="100%"
+								  height="2"/>
+						<s:HGroup width="100%"
+								  verticalAlign="middle">
+							<mx:FormItem id="txtPhoLabel"
+										 width="176"
+										 color="blue">
+								<dataDict:AutoCompleteMaterDeptGrid id="phoInputCode"
+																	width="100%"
+																	restrict="a-zA-Z"
+																	callback="showItemDict"
+																	keyUp="toNextControl(event,amount)"/>
+							</mx:FormItem>
+							<mx:FormItem label="物资名称">
+								<s:TextInput id="materialName"
+											 width="180"
+											 enabled="false"
+											 change="changeHandler(event)"/>
+							</mx:FormItem>
+							<mx:FormItem label="数　　量"
+										 color="blue">
+								<mx:TextInput id="amount"
+											  width="120"
+											  maxChars="12"
+											  restrict="0-9."
+											  textAlign="right"
+											  change="changeHandler(event)"
+											  focusOut="amount_focusOutHandler(event)"
+											  keyUp="amount_keyUpHandler(event)"/>
+							</mx:FormItem>
+							<mx:FormItem id="tradePriceText"
+										 label="进价"
+										 width="120">
+								<s:TextInput id="tradePrice"
+											 width="100%"
+											 maxChars="12"
+											 restrict="0-9."
+											 textAlign="right"
+											 change="changeHandler(event)"
+											 keyUp="toNextControl(event,factoryCode)"/>
+							</mx:FormItem>
+							<s:Label id="factoryCodeText"
+									 text="生产厂家"/>
+							<controls:TextInputIcon id="factoryCode"
+													width="100%"
+													maxChars="40"
+													queryIconClick="factoryCode_queryIconClickHandler()"
+													keyUp="textInputIcon_keyUpHandler(event,madeDate)"/>
+						</s:HGroup>
+						<s:HGroup width="100%"
+								  verticalAlign="middle">
+							<mx:FormItem id="madeDateText"
+										 label="生产日期">
+								<mx:DateField id="madeDate"
+											  width="114"
+											  editable="false"
+											  change="changeHandler(event)"
+											  formatString="YYYY-MM-DD"
+											  enterFrame="{madeDate.selectedDate==null?madeDate.selectedDate=new Date():madeDate.selectedDate}"
+											  selectableRange="{{rangeEnd:new Date()}}"
+											  keyUp="toNextControl(event,batch2)"/>
+							</mx:FormItem>
+							<s:Label id="batchText"
+									 text="批　　号"/>
+							<controls:TextInputIcon id="batch"
+													width="180"
+													maxChars="30"
+													queryIconClick="batch_queryIconClickHandler()"
+													keyUp="textInputIcon_keyUpHandler(event,detailRemark)"/>
+							<s:TextInput id="batch2"
+										 width="180"
+										 maxChars="30"
+										 restrict="0-9"
+										 keyUp="toNextControl(event,availDate)"
+										 change="changeHandler(event)"/>
+							<mx:FormItem id="availDateText"
+										 label="有效期限">
+								<mx:DateField id="availDate"
+											  width="120"
+											  formatString="YYYY-MM-DD"
+											  change="changeHandler(event)"
+											  enterFrame="{availDate.selectedDate==null?availDate.selectedDate=new Date():availDate.selectedDate}"
+											  selectableRange="{{rangeStart:new Date()}}"
+											  keyUp="toNextControl(event,detailRemark)"/>
+							</mx:FormItem>
+							<mx:FormItem label="备注"
+										 width="100%">
+								<s:TextInput id="detailRemark"
+											 width="100%"
+											 maxChars="40"
+											 restrict="^ "
+											 change="changeHandler(event)"
+											 keyUp="toNextControl(event,phoInputCode)"/>
+							</mx:FormItem>
+						</s:HGroup>
+					</s:VGroup>
+
+					<controls:SuperDataGrid id="gdReceiveOtherList"
+											width="100%"
+											height="100%"
+											editable="false"
+											hasRowNo="true"
+											styleName="dataGrid"
+											horizontalScrollPolicy="auto"
+											itemClick="gdReceiveOtherList_clickHandler()"
+											doubleClickEnabled="true"
+											itemDoubleClick="gdReceiveOtherList_doubleClickHandler(event)"
+											format="{[,,,,,'0.00','0.00','0.00']}">
+						<controls:columns>
+							<mx:DataGridColumn headerText="序号"
+											   width="50"
+											   editable="false"/>
+							<mx:DataGridColumn headerText="物资编码"
+											   width="120"
+											   editable="false"
+											   dataField="materialCode"/>
+							<mx:DataGridColumn headerText="物资名称"
+											   width="160"
+											   editable="false"
+											   dataField="materialName"/>
+							<mx:DataGridColumn headerText="规格型号"
+											   width="100"
+											   editable="false"
+											   dataField="materialSpec"/>
+							<mx:DataGridColumn headerText="单位"
+											   width="50"
+											   editable="false"
+											   dataField="materialUnits"/>
+							<mx:DataGridColumn headerText="数量"
+											   width="80"
+											   editable="false"
+											   dataField="amount"
+											   textAlign="right"/>
+							<mx:DataGridColumn headerText="进价"
+											   width="80"
+											   editable="false"
+											   dataField="tradePrice"
+											   textAlign="right"/>
+							<mx:DataGridColumn headerText="金额"
+											   width="80"
+											   editable="false"
+											   dataField="tradeMoney"
+											   textAlign="right"/>
+							<mx:DataGridColumn headerText="生产厂家"
+											   editable="false"
+											   dataField="factoryCode"
+											   labelFunction="labelFun"
+											   width="200"/>
+							<mx:DataGridColumn headerText="生产日期"
+											   dataField="madeDate"
+											   editable="false"
+											   width="90"/>
+							<mx:DataGridColumn headerText="批号"
+											   width="80"
+											   editable="false"
+											   dataField="batch"/>
+							<mx:DataGridColumn headerText="有效期限"
+											   width="80"
+											   editable="false"
+											   dataField="availDate"/>
+							<mx:DataGridColumn headerText="备注"
+											   width="80"
+											   editable="false"
+											   dataField="detailRemark"/>
+						</controls:columns>
+					</controls:SuperDataGrid>
+					<s:HGroup width="100%"
+							  verticalAlign="middle">
+						<mx:FormItem label="现存量">
+							<s:TextInput id="currentStockAmount"
+										 width="100"
+										 enabled="false"/>
+						</mx:FormItem>
+						<mx:FormItem label="制单人">
+							<s:TextInput id="maker"
+										 width="100"
+										 enabled="false"/>
+						</mx:FormItem>
+						<mx:FormItem label="审核人">
+							<s:TextInput id="verifier"
+										 width="100"
+										 enabled="false"/>
+						</mx:FormItem>
+						<mx:FormItem label="审核日期"
+									 width="200">
+							<s:TextInput id="verifyDate"
+										 width="100%"
+										 enabled="false"/>
+						</mx:FormItem>
+						<mx:FormItem label="记账人">
+							<s:TextInput id="accounter"
+										 enabled="false"/>
+						</mx:FormItem>
+					</s:HGroup>
+				</s:VGroup>
+			</s:BorderContainer>
+		</s:VGroup>
+	</s:BorderContainer>
+</mx:Module>

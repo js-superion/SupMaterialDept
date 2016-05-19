@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	 其他出库处理模块-过滤窗体
+	 author:  邢树斌 2011.2.29
+	 checked by
+-->
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   close="PopUpManager.removePopUp(this)"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:controls="cn.superion.base.components.controls.*"
+			   creationComplete="doInit(event)"
+			   title="过滤其他出库单"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="900"
+			   height="509">
+	<s:layout>
+		<s:VerticalLayout/>
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+
+			protected function doInit(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				fillStorageCodeTxt();
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Script source="WinDeliverOtherFilteras.as"/>
+	<s:HGroup id="hgTop"
+			  gap="2"
+			  width="100%"
+			  height="100%">
+		<s:BorderContainer id="bord"
+						   width="100%"
+						   height="100%"
+						   backgroundColor="#E2E8E8">
+			<s:layout>
+				<s:VerticalLayout verticalAlign="top"
+								  paddingLeft="10"
+								  paddingTop="0"/>
+			</s:layout>
+			<s:HGroup id="hg1"
+					  paddingTop="3"
+					  width="100%"
+					  height="35"
+					  paddingRight="5"
+					  verticalAlign="middle">
+				<s:Label text="仓库"
+						 fontSize="14"
+						 paddingLeft="5"
+						 textAlign="center"/>
+				<s:TextInput id="storage"
+							 width="100%"
+							 keyUp="keyUpCtrl(event,beginBillDate)"/>
+				<s:Label text="单据日期"
+						 fontSize="14"/>
+				<mx:DateField width="100%"
+							  id="beginBillDate"
+							  formatString="YYYY-MM-DD"
+							  keyUp="keyUpCtrl(event,endBillDate)"
+							  selectableRange="{{rangeEnd:endBillDate.selectedDate}}"
+							  enterFrame="{beginBillDate.selectedDate==null?beginBillDate.selectedDate=new Date():beginBillDate.selectedDate}"/>
+
+				<s:Label text="—"/>
+				<mx:DateField width="100%"
+							  id="endBillDate"
+							  formatString="YYYY-MM-DD"
+							  fontSize="14"
+							  selectableRange="{{rangeStart:beginBillDate.selectedDate}}"
+							  enterFrame="{endBillDate.selectedDate==null?endBillDate.selectedDate=new Date():endBillDate.selectedDate}"/>
+				<s:Label text="业务类型"
+						 fontSize="14"
+						 paddingLeft="5"/>
+				<s:DropDownList id="operationType"
+								labelField="typeName"
+								width="100%"
+								height="23"
+								dataProvider="{new ArrayCollection([
+								{typeCode:'',typeName:'全部'},
+					{typeCode:'201',typeName:'领用出库'},
+					{typeCode:'202',typeName:'销售出库'},
+					{typeCode:'203',typeName:'调拨出库'},
+					{typeCode:'204',typeName:'盘亏出库'},
+					{typeCode:'205',typeName:'报损出库'},
+					{typeCode:'209',typeName:'其他出库'},
+					])}"
+								selectedIndex="0"/>
+				<s:Label text="业务单号"
+						 fontSize="14"
+						 textAlign="center"/>
+				<mx:TextInput id="operationNo"
+							  width="100%"/>
+				<mx:Spacer width="1"/>
+				<mx:LinkButton id="btQuery"
+							   icon="@Embed('/assets/images/button/query20.png')"
+							   label=" 查询 "
+							   skin="mx.skins.halo.ButtonSkin"
+							   buttonMode="true"
+							   fontSize="12"
+							   width="80"
+							   height="26"
+							   click="btQuery_clickHandler(event)"/>
+			</s:HGroup>
+			<s:HGroup id="hg2"
+					  paddingTop="3"
+					  width="100%"
+					  height="50%"
+					  paddingRight="5">
+				<controls:SuperDataGrid id="gridOtherMaster"
+								   hasRowNo="true"
+								   width="100%"
+								   height="100%"
+								   click="gridOtherMaster_clickHandler(event)">
+					<controls:columns>
+						<mx:DataGridColumn headerText="单据编号"
+										   width="150"
+										   dataField="billNo"/>
+						<mx:DataGridColumn headerText="单据日期"
+										   width="150"
+										   dataField="billDate"/>
+						<mx:DataGridColumn headerText="业务类型"
+										   width="150"
+										   dataField="operationType"/>
+						<mx:DataGridColumn headerText="业务号"
+										   width="150"
+										   dataField="operationNo"/>
+						<mx:DataGridColumn headerText="部门"
+										   width="150"
+										   dataField="deptCode"/>
+						<mx:DataGridColumn headerText="备注"
+										   width="200"
+										   dataField="remark"/>
+					</controls:columns>
+				</controls:SuperDataGrid>
+			</s:HGroup>
+			<s:HGroup id="hg3"
+					  width="100%"
+					  height="50%"
+					  paddingRight="5">
+				<controls:SuperDataGrid hasRowNo="true"
+										width="100%"
+										height="100%"
+										styleName="dataGrid"
+										id="gridOtherDetail">
+					<controls:columns>
+
+						<mx:DataGridColumn headerText="物资编码"
+										   width="120"
+										   dataField="materialCode"/>
+						<mx:DataGridColumn headerText="物资名称"
+										   width="150"
+										   dataField="materialName"/>
+						<mx:DataGridColumn headerText="规格型号"
+										   width="120"
+										   dataField="materialSpec"/>
+
+						<mx:DataGridColumn headerText="单位"
+										   width="50"
+										   dataField="materialUnits"/>
+						<mx:DataGridColumn headerText="单价"
+										   width="80"
+										   dataField="tradePrice"
+										   textAlign="right"/>
+						<mx:DataGridColumn headerText="数量"
+										   width="80"
+										   dataField="amount"
+										   textAlign="right"/>
+						<mx:DataGridColumn headerText="生产厂家"
+										   width="120"
+										   dataField="factoryCode"
+										   textAlign="right"/>
+						<mx:DataGridColumn headerText="批号"
+										   width="100"
+										   dataField="batch"
+										   textAlign="right"/>
+						<mx:DataGridColumn headerText="有效期限"
+										   width="80"
+										   dataField="availDate"
+										   textAlign="right"/>
+
+
+					</controls:columns>
+				</controls:SuperDataGrid>
+			</s:HGroup>
+			<mx:HBox width="100%"
+					 height="33"
+					 horizontalAlign="right"
+					 paddingBottom="5">
+				<mx:LinkButton id="btConfirm"
+							   icon="@Embed('/assets/images/button/confirm20.png')"
+							   label=" 确 定 "
+							   skin="mx.skins.halo.ButtonSkin"
+							   buttonMode="true"
+							   fontSize="12"
+							   width="86"
+							   height="26"
+							   click="btConfirmHandler();"/>
+
+				<mx:LinkButton id="btReturn"
+							   icon="@Embed('/assets/images/button/return20.png')"
+							   label=" 返 回 "
+							   skin="mx.skins.halo.ButtonSkin"
+							   buttonMode="true"
+							   fontSize="12"
+							   width="86"
+							   height="26"
+							   click="PopUpManager.removePopUp(this)"/>
+				<mx:Spacer width="6"/>
+			</mx:HBox>
+		</s:BorderContainer>
+
+	</s:HGroup>
+</s:TitleWindow>

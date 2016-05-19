@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Module xmlns:fx="http://ns.adobe.com/mxml/2009"
+		   xmlns:s="library://ns.adobe.com/flex/spark"
+		   xmlns:mx="library://ns.adobe.com/flex/mx"
+		   layout="absolute"
+		   width="100%"
+		   height="100%"
+		   xmlns:controls="cn.superion.base.components.controls.*"
+		   xmlns:util="cn.superion.material.util.*"
+		   creationComplete="doInit()"
+		   xmlns:dataDict="cn.superion.dataDict.*" xmlns:util1="cn.superion.materialDept.util.*">
+	<fx:Script>
+		<![CDATA[
+			import cn.superion.base.components.controls.DateFieldText;
+			import cn.superion.materialDept.receive.manualApply.view.IETextInput;
+			import cn.superion.materialDept.receive.manualApply.view.IRUrgent;
+		]]>
+	</fx:Script>
+	<fx:Script source="ModManualApplyas.as"/>
+
+	<s:BorderContainer width="100%"
+					   height="100%"
+					   backgroundColor="0xE2E8E8"
+					   borderVisible="false">
+		<s:VGroup width="100%"
+				  height="100%"
+				  gap="0">
+			<util1:ToolBar id="toolBar"
+						  width="100%"
+						  printClick="printClickHandler(event)"
+						  expClick="expClickHandler(event)"
+						  addClick="addClickHandler(event)"
+						  modifyClick="modifyClickHandler(event)"
+						  deleteClick="deleteClickHandler(event)"
+						  saveClick="saveClickHandler(event)"
+						  cancelClick="cancelClickHandler(event)"
+						  verifyClick="verifyClickHandler(event)"
+						  addRowClick="addRowClickHandler(event)"
+						  delRowClick="delRowClickHandler(event)"
+						  queryClick="queryClickHandler(event)"
+						  firstPageClick="firstPageClickHandler(event)"
+						  prePageClick="prePageClickHandler(event)"
+						  nextPageClick="nextPageClickHandler(event)"
+						  lastPageClick="lastPageClickHandler(event)"
+						  exitClick="exitClickHandler(event)"/>
+			<controls:BarSubTitle title="特殊物品申请"/>
+			
+				<s:VGroup id="allPanel"
+						  width="100%"
+						  height="100%"
+						  paddingLeft="5"
+						  paddingBottom="5"
+						  paddingRight="5" 
+						  paddingTop="5">
+					<s:HGroup width="100%"
+							  id="one"
+							  verticalAlign="middle">
+						<s:Label text="供应仓库"/>
+						<s:DropDownList id="storageCode"
+										labelField="storageName"
+										width="20%"
+										change="storageCode_changeHandler(event)"
+										selectedIndex="0"/>
+						<s:Label text="申领科室"/>
+						<s:ComboBox width="20%"
+									id="deptCode"
+									labelField="deptName"
+									requireSelection="true"
+									selectedIndex="0"/>
+						
+						<s:Label text="单据编号"
+								 width="56"/>
+						<s:TextInput id="billNo"
+									 width="20%"
+									 maxChars="13" editable="false"
+									 keyDown="toNextControl(event,billDate)"/>
+						
+						<s:Label text="单据日期"
+								 width="56"/>
+						<mx:DateField id="billDate"
+									  enabled="false"
+									  width="15%"
+									  formatString="YYYY-MM-DD"
+									  keyDown="toNextControl(event,deptCode)"/>
+					</s:HGroup>
+					
+					<s:HGroup id="three"
+							  width="100%"
+							  verticalAlign="middle">
+						<s:Label text="备    注"
+								 width="56"/>
+						<s:TextInput id="remark"
+									 width="100%"
+									 maxChars="20"/>
+					</s:HGroup>
+					<s:VGroup id="addPanel"
+							  width="100%">
+						<mx:HRule width="100%"
+								  height="2"/>
+					</s:VGroup>
+					<controls:SuperDataGrid id="gridDetail"
+											width="100%"
+											height="100%"
+											hasRowNo="true"
+											editable="true" 
+											doubleClickEnabled="true"
+											styleName="dataGrid"
+											horizontalScrollPolicy="auto"
+											format="{[,,,'0.00']}"
+											click="gridDetail_clickHandler(event)">
+						<controls:columns>
+							<mx:DataGridColumn headerText="序号"
+											   dataField="rowNo"
+											   width="30"
+											   editable="false"/>
+							<mx:DataGridColumn headerText="物资名称"
+											   dataField="materialName"
+											   width="300"
+											   itemEditor="{new ClassFactory(IETextInput)}"
+											   editable="true"/>
+							<mx:DataGridColumn headerText="规格型号"
+											   dataField="materialSpec"
+											   width="100"
+											   itemEditor="{new ClassFactory(IETextInput)}"
+											   editable="true"/>
+							<mx:DataGridColumn headerText="单位"
+											   dataField="materialUnits"
+											   width="100"
+											   itemEditor="{new ClassFactory(IETextInput)}"
+											   editable="true"/>
+							<mx:DataGridColumn headerText="数量"
+											   dataField="amount"
+											   width="100"
+											   itemEditor="{new ClassFactory(IETextInput)}"
+											   textAlign="right"
+											   editable="true"/>
+							<mx:DataGridColumn headerText="审核数量"
+											   dataField="sendAmount"
+											   width="80"
+											   textAlign="right"/>
+							<mx:DataGridColumn headerText="是否加急"
+											   dataField="urgentSign"
+											   width="150"
+											   rendererIsEditor="true"
+											   itemRenderer="cn.superion.materialDept.receive.manualApply.view.IRUrgent"
+											   editable="true"/>
+						
+							<mx:DataGridColumn headerText="备注"
+											   dataField="detailRemark"
+											   editable="true"
+											   width="220"/>
+						</controls:columns>
+					</controls:SuperDataGrid>
+
+					<s:VGroup width="100%">
+						
+					
+					<s:HGroup id="hou"
+							  width="100%"
+							  verticalAlign="middle">
+
+						<mx:FormItem label="制单人" width="25%">
+							<s:TextInput id="maker"
+										 width="100%"
+										 enabled="false"/>
+						</mx:FormItem>
+						<mx:FormItem label="制单日期"  width="25%">
+							<s:TextInput id="makeDate"
+										 width="100%"
+										 enabled="false"/>
+						</mx:FormItem>
+						<mx:FormItem label="审核人"  width="25%">
+							<s:TextInput id="verifier"
+										 width="100%"
+										 enabled="false"/>
+						</mx:FormItem>
+						<mx:FormItem label="审核日期"  width="25%">
+							<s:TextInput id="verifyDate"
+										 width="100%"
+										 enabled="false"/>
+						</mx:FormItem>
+					</s:HGroup>
+					<s:HGroup id="two"
+							  width="100%"
+							  verticalAlign="middle">
+						<s:Label text="总务意见："
+								 width="76"/>
+						<s:TextInput id="remark1"
+									 width="30%"
+									 editable="false"
+									 maxChars="20"/>
+						
+						<s:Label text="上级意见："
+								 width="76"/>
+						<s:TextInput id="remark2"
+									 width="30%" editable="false"
+									 toolTip="分管病区、科室的领导意见"
+									 maxChars="20"/>
+						
+						<s:Label text="院管办："
+								 width="76"/>
+						<s:TextInput id="remark3"
+									 toolTip="分管物品耗材的领导意见"
+									 width="30%"
+									 editable="false"
+									 maxChars="20"/>
+					</s:HGroup>
+					</s:VGroup>
+					<mx:Spacer height="5"/>
+				</s:VGroup>
+		</s:VGroup>
+	</s:BorderContainer>
+</mx:Module>

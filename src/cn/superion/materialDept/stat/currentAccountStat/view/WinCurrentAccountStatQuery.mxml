@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:controls="cn.superion.base.components.controls.*"
+			   width="500"
+			   height="369"
+			   backgroundColor="0xE2E8E8"
+			   title="流水账查询"
+			   close="closeWin()"
+			   creationComplete="doInit()">
+	<s:layout>
+		<s:VerticalLayout paddingLeft="10"
+						  paddingRight="10"
+						  paddingTop="10"
+						  paddingBottom="10"/>
+	</s:layout>
+	
+	<fx:Script source="WinCurrentAccountStatQueryas.as"/>
+	
+	<!-- 查询条件区 -->	
+	<mx:TabNavigator width="100%"
+					 height="100%"
+					 paddingBottom="15"
+					 paddingTop="15"
+					 paddingLeft="15"
+					 paddingRight="15"
+					 backgroundColor="0xE2E8E8">
+		<s:NavigatorContent width="100%"
+							height="100%"
+							label="查询条件">
+			<s:VGroup id="queryArea"
+					  width="100%"
+					  height="100%">
+				<s:HGroup width="100%"
+						  verticalAlign="middle"
+						  paddingTop="3">
+					<s:Label text="业务类型"
+							 width="75"/>
+					<s:ComboBox id="operationType"
+									width="100%"
+									height="25"
+									labelField="operationTypeName"
+									selectedIndex="0"
+									requireSelection="true"
+									keyUp="toNextControl(event,billDate)"/>
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  verticalAlign="middle"
+						  paddingTop="3">
+					<s:CheckBox id="billDate"
+								label="单据日期"
+								width="75"
+								keyUp="toNextControl(event,beginBillDate)"/>
+					<mx:DateField id="beginBillDate"
+								  width="100%"
+								  formatString="YYYY-MM-DD"
+								  enabled="{billDate.selected}"
+								  enterFrame="{beginBillDate.selectedDate==null?beginBillDate.selectedDate=new Date():beginBillDate}"
+								  selectableRange="{{rangeEnd:endBillDate.selectedDate}}"
+								  keyUp="toNextControl(event,endBillDate)"/>
+					<s:Label text="-"/>
+					<mx:DateField id="endBillDate"
+								  width="100%"
+								  formatString="YYYY-MM-DD"
+								  enabled="{billDate.selected}"
+								  enterFrame="{endBillDate.selectedDate==null?endBillDate.selectedDate=new Date():endBillDate.selectedDate}"
+								  selectableRange="{{rangeStart:beginBillDate.selectedDate,rangeEnd:new Date()}}"
+								  keyUp="toNextControl(event,beginBillNo)"/>
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  verticalAlign="middle"
+						  paddingTop="3">
+					<s:Label text="单据编号"
+							 width="75"/>
+					<mx:TextInput id="beginBillNo"
+								  width="100%"
+								  maxChars="30"
+								  keyUp="toNextControl(event,endBillNo)"/>
+					<s:Label text="-"/>
+					<mx:TextInput id="endBillNo"
+								  width="100%"
+								  maxChars="30"
+								  keyUp="toNextControl(event,materialClass)"/>
+				</s:HGroup>
+				<s:HGroup width="100%"
+						  verticalAlign="middle"
+						  paddingTop="3">
+					<s:Label text="物资分类"
+							 width="75"/>
+					<controls:TextInputIcon id="materialClass"
+											width="100%"
+											height="23"
+											queryIconClick="materialClass_queryIconClickHandler(event)"
+											keyUp="queryIcon_keyUpHandler(event,beginMaterialCode)"/>
+
+				</s:HGroup>
+				
+				<s:HGroup width="100%"
+						  verticalAlign="middle">
+					<s:Label text="物资编码"
+							 width="75"/>
+					<controls:TextInputIcon id="beginMaterialCode"
+											width="50%"
+											queryIconClick="materialCode_queryIconClickHandler(event)"
+											keyUp="queryIcon_keyUpHandler(event,endMaterialCode)"/>
+					<s:Label text="-"/>
+					<controls:TextInputIcon id="endMaterialCode"
+											width="50%"
+											queryIconClick="materialCode_queryIconClickHandler(event)"
+											keyUp="queryIcon_keyUpHandler(event,supplyDeptCode)"/>
+				</s:HGroup>
+			
+				<s:HGroup width="100%"
+						  verticalAlign="middle"
+						  paddingTop="3">
+					<s:Label text="供应单位"
+							 width="75"/>
+					<controls:TextInputIcon id="supplyDeptCode"
+											width="100%"
+											queryIconClick="supplyDeptCode_queryIconClickHandler()"
+											keyUp="queryIcon_keyUpHandler(event,personId)"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%"
+						  verticalAlign="middle"
+						  paddingTop="3">
+					<s:Label text="业 务 员"
+							 width="75"/>
+					<controls:TextInputIcon id="personId"
+											width="100%"
+											queryIconClick="personId_queryIconClickHandler()"
+											keyUp="queryIcon_keyUpHandler(event,btQuery)"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:NavigatorContent>
+	</mx:TabNavigator>
+	
+	<s:HGroup width="100%"
+			  height="31"
+			  horizontalAlign="right"
+			  verticalAlign="middle">
+		<mx:LinkButton id="btQuery"
+					   height="26"
+					   label=" 确 定"
+					   skin="mx.skins.halo.ButtonSkin"
+					   icon="@Embed(source='assets/images/button/confirm20.png')"
+					   click="btQuery_clickHandler()"/>
+		<mx:LinkButton id="btReturn"
+					   height="26"
+					   label=" 取 消"
+					   skin="mx.skins.halo.ButtonSkin"
+					   icon="@Embed(source='assets/images/button/return20.png')"
+					   click="closeWin()"/>
+	</s:HGroup>
+</s:TitleWindow>

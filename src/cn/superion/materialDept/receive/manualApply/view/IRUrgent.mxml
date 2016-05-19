@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:MXDataGridItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						  xmlns:s="library://ns.adobe.com/flex/spark" 
+						  creationComplete="mxdatagriditemrenderer1_creationCompleteHandler(event)"
+						  xmlns:mx="library://ns.adobe.com/flex/mx" 
+						  focusEnabled="true">
+	
+	<fx:Declarations>
+		<mx:RadioButtonGroup id="grp" change="grp_changeHandler(event)"/>
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.DataGrid;
+			import mx.events.FlexEvent;
+			
+			
+			protected function grp_changeHandler(event:Event):void
+			{
+				// TODO Auto-generated method stub
+				var dataField:String = dataGridListData.dataField;
+				data[dataField] = event.currentTarget.selectedValue;
+			}
+			
+			protected function mxdatagriditemrenderer1_creationCompleteHandler(event:FlexEvent):void
+			{
+				var dataField:String=event.currentTarget.listData.dataField;
+				var ss:* = data[dataField];
+			 	grp.selection = ss=='1'?grp1: ss=='2'?grp2:null;
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<s:HGroup>
+		<mx:RadioButton groupName="grp" id="grp1" selected="true" label="一般" value="1"/>
+		<mx:RadioButton groupName="grp" id="grp2" label="加急" value="2"/>		
+	</s:HGroup>
+	
+</s:MXDataGridItemRenderer>

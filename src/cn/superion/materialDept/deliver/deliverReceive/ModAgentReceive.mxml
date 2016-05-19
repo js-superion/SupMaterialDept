@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Module xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   xmlns:s="library://ns.adobe.com/flex/spark" 
+		   xmlns:mx="library://ns.adobe.com/flex/mx"
+		   layout="absolute" 
+		   width="100%" 
+		   height="100%" xmlns:util="cn.superion.materialDept.util.*" 
+		   xmlns:controls="cn.superion.base.components.controls.*">
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:BorderContainer width="100%"
+					   height="100%"
+					   backgroundColor="0xE2E8E8">
+		
+		<s:VGroup width="100%"
+				  height="100%"
+				  gap="0">
+			<util:MainToolBar id="btToolBar"
+							  width="100%"/>
+			<controls:BarSubTitle title="代销入库"/>
+			<s:VGroup width="100%"
+					  height="100%"
+					  gap="0">
+					<mx:TabNavigator width="100%"
+									 height="100%"
+									 backgroundColor="0xE2E8E8">
+						<s:NavigatorContent width="100%"
+											height="100%"
+											label="入库信息">
+							<s:HGroup width="100%"
+									  height="100%">
+								<controls:SuperDataGrid width="100%"
+														height="100%"
+														styleName="dataGrid">
+									<controls:columns>
+										<mx:DataGridColumn headerText="申请人"
+														   width="160"
+														   textAlign="left"/>
+										<mx:DataGridColumn headerText="使用病人"
+														   width="160"
+														   textAlign="left"/>
+										<mx:DataGridColumn headerText="病人住院号"
+														   width="100"
+														   textAlign="left"/>
+										<mx:DataGridColumn headerText="病人性别"
+														   width="100"
+														   textAlign="left"/>
+										<mx:DataGridColumn headerText="病人年龄"
+														   width="80"
+														   textAlign="left"/>
+										<mx:DataGridColumn headerText="年龄单位"
+														   width="80"
+														   textAlign="left"/>
+										<mx:DataGridColumn headerText="病人床号"
+														   width="80"
+														   textAlign="left"/>
+										<mx:DataGridColumn headerText="病人所在科室"
+														   width="120"
+														   textAlign="left"/>
+										<mx:DataGridColumn headerText="病人所在病区"
+														   width="120"
+														   textAlign="left"/>
+										<mx:DataGridColumn headerText="确审时间"
+														   width="120"
+														   textAlign="left"/>
+									</controls:columns>
+								</controls:SuperDataGrid>
+							</s:HGroup>
+						</s:NavigatorContent>
+						<s:NavigatorContent width="100%"
+											height="100%"
+											label="出库信息">
+						</s:NavigatorContent>
+					</mx:TabNavigator>
+			</s:VGroup>
+		</s:VGroup>
+	</s:BorderContainer>
+</mx:Module>

@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
+				width="970"
+				height="338"
+				showCloseButton="true"
+				backgroundColor="0xE2E8E8"
+				close="close()"
+				title="物资字典"
+				titleStyleName="winHeader"
+				creationComplete="doInit()" layout="vertical"
+				xmlns:controls="cn.superion.base.components.controls.*">
+	<mx:Script>
+		<![CDATA[
+			import cn.superion.base.components.controls.CheckBoxIR;
+			import cn.superion.base.config.AppInfo;
+			import cn.superion.base.config.BaseDict;
+			import cn.superion.base.config.ParameterObject;
+			import cn.superion.base.util.ArrayCollUtils;
+			import cn.superion.base.util.RemoteUtil;
+			import cn.superion.base.util.StringUtils;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.CheckBox;
+			import mx.events.ListEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.remoting.mxml.RemoteObject;
+
+			private var _this:*=this;
+
+			public var callback:Function;
+
+			public var destination:String="materialCommonDictImpl";
+			public var findDetailInputCodeMethod:String="findByInputCode";
+
+			//仓库
+			public var storageCode:String;
+			//物资类别
+			public var materialClass:String;
+			//固定资产标志
+			public var fixedSign:String;
+			//供应物资标志
+			public var cssdSign:String;
+			//显示库存量
+			[Bindable]
+			public var stockAmountVisible:Boolean;
+			//是否允许零出库
+			public var isZeroDeliver:Boolean;
+			//是否隐藏字段
+			[Bindable]
+			public var isHidden:Boolean;
+
+			[Bindable]
+			public var columnsFields:ArrayCollection=new ArrayCollection(
+				['materialName', 'generalName', 'materialSpec', 'materialUnits', 
+					'retailPrice', 'wholeSalePrice', 'factoryCode', 'amount'])
+
+			private function doInit():void
+			{
+				//根据登录时，选中的五笔、拼音码显示对应选
+				if (AppInfo.currentUserInfo.inputCode == 'FIVE_INPUT')
+				{
+					rioInputType.selectedValue='fiveInputCode'
+				}
+				else
+				{
+					rioInputType.selectedValue='phoInputCode'
+				}
+
+				rioInputType.selectedValue="";
+				if(!isZeroDeliver)
+				{
+					columnsFields=new ArrayCollection(
+						['materialName', 'generalName', 'materialSpec', 'materialUnits', 
+							'retailPrice', 'wholeSalePrice', 'factoryCode', 'virtualAmount']);
+				}
+
+				var parameter:ParameterObject=new ParameterObject();
+				parameter.itemsPerPage=50
+				configGridParameter(parameter);
+				gridList.config(parameter, destination, findDetailInputCodeMethod, callbackSetFocus);
+//				gridList.panelPager.visible=false;
+				gridList.grid.isAutoFetchDictData=false;
+				if(!isHidden){
+					stockAmountVisible=false;
+				}	
+				this.setFocus();
+				txtInputCode.setFocus();
+				buildMaterialClassTree()
+			}
+
+			private function buildMaterialClassTree():void{
+				var ro:RemoteObject=RemoteUtil.getRemoteObject(destination, function(rev:Object):void
+				{
+					var config:Object=new Object()
+					config.dataList=rev.data
+					config.labelField='className' //显示节点label字段 
+					config.rootParentCode='00'// 顶级节点上级父节点代码值 
+					config.parentCodeField='parentCode' // 父节点字段代码 
+					config.codeField='classCode' //节点代码字段 
+					treeClass.dataProvider= ArrayCollUtils.buildTreeData(config)
+				})
+				ro.findMaterialClass()
+			}
+			/**
+			 * 查询回调函数
+			 */
+			private function callbackSetFocus(rev:Object):void
+			{
+				if (rev.data.length == 0)
+				{
+					this.txtInputCode.setFocus();
+				}
+			}
+
+			/**
+			 * 配置表格参数
+			 */
+			private function configGridParameter(parameter:*):void
+			{
+				if (!parameter.conditions)
+				{
+					parameter.conditions={};
+				}
+				parameter.conditions.storageCode=storageCode;
+				parameter.conditions.materialClass=this.treeClass.selectedItem?this.treeClass.selectedItem.classCode:null;
+				parameter.conditions.fixedSign=fixedSign;
+				parameter.conditions.cssdSign=cssdSign;
+				parameter.conditions.storageMaterialSign="0";
+			}
+
+
+			/**
+			 * 关闭当前窗口
+			 */
+			private function close():void
+			{
+				PopUpManager.removePopUp(this);
+			}
+
+			/**
+			 * 查询当前物资字典
+			 */
+			private function queryHandler(e:*=null):void
+			{
+				var parameter:ParameterObject=new ParameterObject();
+				parameter.conditions[rioInputType.selectedValue]=txtInputCode.text;
+
+				configGridParameter(parameter);
+//				gridList.panelPager.visible=false;
+				gridList.reQuery(parameter);
+			}
+
+			/**
+			 * 确认所选择的物资
+			 */
+			private function confirmSelected(event:*=null):void
+			{
+				var lselectedItems:Array=getAllSelectedItems()
+				callback(lselectedItems);
+				close();
+			}
+
+			/**
+			 * 获取选择的物资
+			 */
+			private function getAllSelectedItems():Array
+			{
+				var laryItems:ArrayCollection=gridList.grid.dataProvider as ArrayCollection;
+				var larySelectedItems:Array=[];
+				for each (var item:Object in laryItems)
+				{
+					if (item.isSelected)
+					{
+						larySelectedItems.push(item);
+					}
+				}
+				if(larySelectedItems.length==0){
+					var lselItem:Object=gridList.grid.selectedItem
+					if(lselItem){
+						larySelectedItems.push(lselItem);
+					}
+				}
+				return larySelectedItems;
+			}
+			private function txtInputCodeKeyUpHandler(ek:KeyboardEvent):*
+			{
+				if(ek.keyCode == Keyboard.ENTER){
+					gridList.grid.setFocus();
+					if(gridList.grid.dataProvider.length>0){
+						confirmSelected();	
+						return
+					}
+				}
+				if (ek.keyCode == Keyboard.DOWN)
+				{
+					this.setFocus();
+					gridList.grid.setFocus();
+					if((gridList.grid.selectedIndex+1)<gridList.grid.dataProvider.length){
+						gridList.grid.selectedIndex=gridList.grid.selectedIndex+1
+					}
+					return;
+				}
+				
+				var queryKey:String=ek.currentTarget.text
+				var value:String=StringUtils.Trim(queryKey)
+				var timer:Timer=new Timer(310,1)
+				timer.addEventListener(TimerEvent.TIMER,function(et:Event):void{
+					if(value==StringUtils.Trim(ek.target.text))
+					{
+						queryHandler();
+					}
+				})
+				timer.start()  	
+			}
+
+			protected function gridList_keyUpHandler(event:KeyboardEvent):void
+			{
+				if (event.keyCode == Keyboard.ENTER)
+				{
+					confirmSelected();
+				}
+			}
+
+			/**
+			 * 转换生产厂家
+			 */
+			private function produceCorporationLBF(item:Object, column:DataGridColumn):String
+			{
+				if (column.dataField == 'produceCorporationName')
+				{
+					return item.produceCorporationName;
+				}
+				if (column.dataField == '')
+				{
+					return '';
+				}
+				item.produceCorporationName='';
+				var tarItem:Object=ArrayCollUtils.findItemInArrayByValue(BaseDict.providerDict, 'provider', item.factoryCode);
+				if (tarItem)
+				{
+					item.produceCorporationName=tarItem.providerName;
+				}
+				return item.produceCorporationName;
+			}
+			
+			/**
+			 * 更改节点事件响应函数
+			 * */
+			private function changNodeHand(e:Event):void
+			{
+				var node:Object=e.target.selectedItem;
+				if (!node)
+				{
+					return;
+				}
+				var parameter:ParameterObject=new ParameterObject();
+				configGridParameter(parameter)
+				parameter.conditions.materialClass=node.classCode
+				var ro:RemoteObject=RemoteUtil.getRemoteObject(destination, function(rev:Object):void
+				{
+					gridList.grid.dataProvider=rev.data
+					gridList.btFirst.enabled=false
+					gridList.btLast.enabled=false
+					gridList.btPre.enabled=false
+					gridList.btNext.enabled=false
+					gridList.btRefresh.enabled=false
+				})
+				ro.findMaterialDictByClass(parameter);
+			}
+
+		]]>
+	</mx:Script>
+	<mx:HBox width="100%"
+			 height="100%">
+		<mx:Tree id="treeClass"
+				 horizontalScrollPolicy="on"
+				 labelField="className" showRoot="false"
+				 width="170"
+				 height="100%"
+				 left="5"
+				 right="5"
+				 itemClick="changNodeHand(event)"
+				 top="10"
+				 bottom="10"/>
+	<mx:VBox width="100%"
+			 height="100%"
+			 verticalGap="0">
+		<mx:HBox verticalAlign="middle"
+				 id="panelInput"
+				 width="100%"
+				 height="30"
+				 horizontalGap="2">
+			<mx:Spacer width="5"/>
+			<mx:RadioButtonGroup id="rioInputType"/>
+			<mx:RadioButton label="拼音简码"
+							value="phoInputCode"
+							groupName="rioInputType"/>
+			<mx:RadioButton label="五笔简码"
+							value="fiveInputCode"
+							groupName="rioInputType"/>
+			<mx:TextInput id="txtInputCode"
+						  width="150"
+						  fontSize="15"
+						  restrict="^ "
+						  keyUp="txtInputCodeKeyUpHandler(event)"/>
+			<mx:Spacer width="2"/>
+			<mx:LinkButton id="btQuery"
+						   width="86"
+						   height="25"
+						   label=" 查 找"
+						   skin="mx.skins.halo.ButtonSkin"
+						   icon="@Embed(source='assets/images/button/query20.png')"
+						   click="queryHandler(event)"/>
+		</mx:HBox>
+		<mx:HBox width="100%"
+				 height="100%"
+				 id="panelGrid"
+				 horizontalGap="5">
+			<controls:PageGrid id="gridList"
+							   width="100%"
+							   height="100%"
+							   styleName="dataGrid"
+							   isOnlyButton="true"
+							   itemDoubleClick="confirmSelected(event)"
+							   keyUp="gridList_keyUpHandler(event)">
+				<controls:columns>
+					<mx:DataGridColumn headerText=""
+									   dataField="isSelected"
+									   width="0.5"
+									   textAlign="center"
+									   itemRenderer="{new ClassFactory(CheckBoxIR)}"/>
+					<mx:DataGridColumn headerText="物资名称"
+									   dataField="{columnsFields.getItemAt(0)}"
+									   width="4.5"/>
+					<mx:DataGridColumn headerText="通用名称"
+									   dataField="{columnsFields.getItemAt(1)}"
+									   width="3.6"/>
+					<mx:DataGridColumn headerText="规格型号"
+									   dataField="{columnsFields.getItemAt(2)}"
+									   width="2.5"/>
+					<mx:DataGridColumn headerText="单位"
+									   dataField="{columnsFields.getItemAt(3)}"
+									   width="2.5"/>
+					<!--<mx:DataGridColumn headerText="批发价"
+									   dataField="{columnsFields.getItemAt(5)}"
+									   width="2"
+									   textAlign="right"
+									   visible="{isHidden}"/>-->
+					<mx:DataGridColumn headerText="库存"
+									   visible="{stockAmountVisible}"
+									   dataField="{columnsFields.getItemAt(7)}"
+									   width="1.2"
+									   textAlign="right"/>
+					<!--<mx:DataGridColumn headerText="售价"
+									   dataField="{columnsFields.getItemAt(4)}"
+									   width="2"
+									   textAlign="right"
+									   visible="{isHidden}"/>-->
+					<mx:DataGridColumn headerText="生产企业"
+									   dataField="{columnsFields.getItemAt(6)}"
+									   labelFunction="produceCorporationLBF"
+									   width="2.3"
+									   visible="{isHidden}"/>
+					
+				</controls:columns>
+			</controls:PageGrid>
+		</mx:HBox>
+	</mx:VBox>
+	</mx:HBox>
+	<mx:HBox width="100%"
+			 height="30"
+			 horizontalAlign="right"
+			 id="panelButtons"
+			 paddingRight="0"
+			 paddingLeft="0">
+		<mx:Text id="txtStockInfo"
+				 width="232"
+				 height="25"
+				 color="#FF0000"/>
+		<mx:Spacer width="100%"/>
+		<mx:Button label="确认"
+				   width="86"
+				   height="25"
+				   fontSize="12"
+				   click="confirmSelected(event)"/>
+		<mx:Button id="btClose"
+				   label="取消"
+				   width="86"
+				   height="25"
+				   fontSize="12"
+				   click="close()"/>
+	</mx:HBox>
+
+</mx:TitleWindow>
