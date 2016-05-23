@@ -85,7 +85,7 @@
 							  lastPageClick="lastPageClickHandler(event)"
 							  abandonClick="abandonClickHandler(event)"
 							  exitClick="exitClickHandler(event)"/>
-				<controls:BarSubTitle title="物资领用申请"/>
+				<controls:BarSubTitle title="常规物资申请"/>
 				<s:BorderContainer id="bord"
 								   width="100%"
 								   height="70"
@@ -129,10 +129,10 @@
 										  paddingRight="2"
 										  width="100%"
 										  verticalAlign="middle">
-									<s:Label text="供应仓库"/>
+									<s:Label text="仓库"/>
 									<s:DropDownList id="storageCode"
 													labelField="storageName"
-													width="20%"
+													width="100"
 													change="storageCode_changeHandler(event)"
 													keyDown="toNextCtrl(event,supplyDeptCode)"
 													selectedIndex="0"/>
@@ -147,8 +147,8 @@
 															visible="false"
 															includeInLayout="false"
 															keyDown="toNextCtrl(event,deptCode)"/>
-									<s:Label text="申领科室"/>
-									<s:ComboBox width="20%"
+									<s:Label text="领用科室"/>
+									<s:ComboBox width="130"
 												 id="deptCode"
 												 labelField="deptName"
 												 change="deptCode_changeHandler(event)"
@@ -156,12 +156,12 @@
 												 selectedIndex="0"
 												 keyDown="toNextCtrl(event,billNo)"/>
 									<s:Label text="单据编号"/>
-									<s:TextInput width="20%" enabled="false"
+									<s:TextInput width="120" enabled="false"
 												 id="billNo"
 												 restrict="0-9"
 												 keyDown="toNextCtrl(event,billDate)"/>
 									<s:Label text="单据日期"/>
-									<mx:DateField width="10%" enabled="false"
+									<mx:DateField width="105" enabled="false"
 												  id="billDate"
 												  formatString="YYYY-MM-DD"
 												  keyDown="toNextCtrl(event,remark)"
@@ -187,19 +187,19 @@
 												 editable="false"
 												 id="accountRemain"
 												 enter="{remark.setFocus();}"/>
-									<s:Label text="备　　注"/>
+									<s:Label text="备注"/>
 									<s:TextInput id="remark"
 												 width="40%"
 												 change="{if(_materialProvideMaster)_materialProvideMaster.remark = remark.text}"
 												 keyDown="toNextCtrl(event,materialCode)"/>
 									<s:Label text="本季度限额"/>
-									<s:TextInput id="seasonLimit" editable="false" width="20%"/>
+									<s:TextInput id="seasonLimit" editable="false" width="70"/>
 									
 									<s:Label text="已用限额"/>
-									<s:TextInput id="usedLimit" editable="false" width="20%"/>
+									<s:TextInput id="usedLimit" editable="false" width="70"/>
 									
 									<s:Label text="剩余限额"/>
-									<s:TextInput id="remainLimit" editable="false" width="20%"/>
+									<s:TextInput id="remainLimit" editable="false" width="70"/>
 									
 								</s:HGroup>
 							</s:VGroup>
@@ -228,7 +228,7 @@
 								<s:TextInput width="22%"
 											 id="materialSpec"
 											 editable="false"/>
-								<s:Label text="单　　位"/>
+								<s:Label text="单位"/>
 								<s:TextInput width="5%"
 											 id="materialUnits"
 											 editable="false"/>
@@ -275,9 +275,9 @@
 						<mx:DataGridColumn headerText="序号"
 										   dataField="rowno"
 										   editable="false"
-										   width="0.5"/>
+										   width="0.4"/>
 						<mx:DataGridColumn headerText="物资编码"
-										   width="1.4"
+										   width="1"
 										   editable="false"
 										   dataField="materialCode"/>
 						<mx:DataGridColumn headerText="物资名称"
@@ -292,11 +292,11 @@
 										   width="0.4"
 										   editable="false"
 										   dataField="materialUnits"/>
-					<!--	<mx:DataGridColumn headerText="进价"
+						<mx:DataGridColumn headerText="进价"
 										   width="1"
 										   editable="false"
 										   textAlign="right"
-										   dataField="tradePrice"/>-->
+										   dataField="tradePrice"/>
 						<mx:DataGridColumn headerText="申请数量"
 										   width="1"
 										   editable="false"
@@ -313,7 +313,7 @@
 										   textAlign="right"
 										   dataField="tradeMoney"/>
 						<mx:DataGridColumn headerText="备注"
-										   width="1"
+										   width="1.2"
 										   editable="true"
 										   textAlign="left"
 										   dataField="detailRemark"/>

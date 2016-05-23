@@ -18,13 +18,15 @@
 	<fx:Declarations>
 		<s:ArrayCollection id="aryCurrentStatus">
 			<fx:Object code="0"
-					   name="新建"/>
+					   name="未提交(0)"/>
 			<fx:Object code="1"
-					   name="审核"/>
+					   name="提交，仓库未确认(1)"/>
 			<fx:Object code="2"
-					   name="出库"/>
+					   name="提交，供货量未审(2)"/>
 			<fx:Object code="3"
-					   name="入库"/>
+					   name="提交，供货商未审(3)"/>
+			<fx:Object code="4"
+					   name="供货发货(4)"/>
 		</s:ArrayCollection>
 	</fx:Declarations>
 	<mx:TabNavigator height="201"
@@ -46,13 +48,13 @@
 							 direction="horizontal"
 							 width="441">
 					<s:TextInput id="beginBillNo"
-								 width="162"
+								 width="120"
 								 restrict="0-9"
 								 keyUp="toNextControl(event,endBillNo)"/>
 
 					<mx:FormItem label="－">
 						<s:TextInput id="endBillNo"
-									 width="162"
+									 width="120"
 									 restrict="0-9"
 									 keyUp="toNextControl(event,beginBillDate)"/>
 					</mx:FormItem>
@@ -62,7 +64,7 @@
 							 label="申请日期"
 							 width="436">
 					<mx:DateField id="beginBillDate"
-								  width="162"
+								  width="120"
 								  formatString="YYYY-MM-DD"
 								  editable="true"
 								  selectedDate="{beginBillDate.selectedDate==null?beginBillDate.selectedDate=new Date():beginBillDate.selectedDate}"
@@ -71,7 +73,7 @@
 
 					<mx:FormItem label="－">
 						<mx:DateField id="endBillDate"
-									  width="150"
+									  width="120"
 									  formatString="YYYY-MM-DD"
 									  editable="true"
 									  selectedDate="{endBillDate.selectedDate==null?endBillDate.selectedDate=new Date():endBillDate.selectedDate}"
