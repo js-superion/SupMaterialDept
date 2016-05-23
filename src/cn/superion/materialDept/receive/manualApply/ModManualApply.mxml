@@ -43,7 +43,7 @@
 						  nextPageClick="nextPageClickHandler(event)"
 						  lastPageClick="lastPageClickHandler(event)"
 						  exitClick="exitClickHandler(event)"/>
-			<controls:BarSubTitle title="特殊物品申请"/>
+			<controls:BarSubTitle title="特殊物资申请"/>
 			
 				<s:VGroup id="allPanel"
 						  width="100%"
@@ -55,31 +55,29 @@
 					<s:HGroup width="100%"
 							  id="one"
 							  verticalAlign="middle">
-						<s:Label text="供应仓库"/>
+						<s:Label text="仓库"/>
 						<s:DropDownList id="storageCode"
 										labelField="storageName"
-										width="20%"
+										width="100"
 										change="storageCode_changeHandler(event)"
 										selectedIndex="0"/>
-						<s:Label text="申领科室"/>
-						<s:ComboBox width="20%"
+						<s:Label text="领用科室"/>
+						<s:ComboBox width="130"
 									id="deptCode"
 									labelField="deptName"
 									requireSelection="true"
-									selectedIndex="0"/>
-						
+									selectedIndex="0"/>						
 						<s:Label text="单据编号"
 								 width="56"/>
 						<s:TextInput id="billNo"
-									 width="20%"
-									 maxChars="13" editable="false"
-									 keyDown="toNextControl(event,billDate)"/>
-						
+									 width="120"
+									 maxChars="13" enabled="false"
+									 keyDown="toNextControl(event,billDate)"/>						
 						<s:Label text="单据日期"
 								 width="56"/>
 						<mx:DateField id="billDate"
 									  enabled="false"
-									  width="15%"
+									  width="105"
 									  formatString="YYYY-MM-DD"
 									  keyDown="toNextControl(event,deptCode)"/>
 					</s:HGroup>

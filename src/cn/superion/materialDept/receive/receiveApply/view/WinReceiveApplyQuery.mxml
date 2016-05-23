@@ -5,7 +5,7 @@
 			   backgroundColor="0xE2E8E8"
 			   width="492"
 			   height="284"
-			   title="物资领用列表"
+			   title="常规物资申请查询"
 			   close="PopUpManager.removePopUp(this)"
 			   xmlns:controls="cn.superion.base.components.controls.*"
 			   creationComplete="doInit()">
@@ -110,7 +110,7 @@
 				<mx:FormItem width="439"
 							 label="当前状态">
 					<s:DropDownList id="currentStatus"
-									width="363"
+									width="100%"
 									selectedIndex="0"
 									labelField="name"
 									dataProvider="{aryCurrentStatus}"

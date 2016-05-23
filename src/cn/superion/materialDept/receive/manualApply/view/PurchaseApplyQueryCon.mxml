@@ -3,10 +3,10 @@
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
 			   xmlns:controls="cn.superion.base.components.controls.*"
-			   width="500"
-			   height="296"
+			   width="418"
+			   height="226"
 			   backgroundColor="0xE2E8E8"
-			   title="特殊申请单查找"
+			   title="特殊物资申请查询"
 			   close="returnHandler()">
 	<s:layout>
 		<s:VerticalLayout paddingLeft="10"
@@ -25,8 +25,8 @@
 		}
 	</fx:Style>
 	<!-- 查询条件区 -->
-	<mx:TabNavigator width="478"
-					 height="100%"
+	<mx:TabNavigator width="392"
+					 height="149"
 					 paddingBottom="15"
 					 paddingTop="15"
 					 paddingLeft="15"
@@ -34,20 +34,14 @@
 					 backgroundColor="0xE2E8E8">
 		<s:NavigatorContent width="450"
 							height="100%"
-							label="过滤条件">
-			<s:VGroup id="drugInQuery"
-					  width="100%"
-					  height="100%"
-					  verticalAlign="middle">
-				<s:HGroup width="100%"
-						  verticalAlign="middle">
-				</s:HGroup>
+							label="查询条件">
+			<s:VGroup id="drugInQuery" x="0" y="-10" width="100%" height="113" verticalAlign="middle">
 				<s:HGroup width="100%"
 						  verticalAlign="middle">
 					<s:Label text="单据编号"
 							 width="75"/>
 					<s:TextInput id="billNoFrom"
-								 width="47%"
+								 width="120"
 								 maxChars="20"
 								 keyUp="toNextControl(event,billNoTo)"/>
 					<mx:FormItem label="-"
@@ -55,7 +49,7 @@
 								 width="53%"
 								 horizontalGap="0">
 						<s:TextInput id="billNoTo"
-									 width="100%"
+									 width="120"
 									 maxChars="20"
 									 keyUp="toNextControl(event,isBillDate)"/>
 					</mx:FormItem>
@@ -71,7 +65,7 @@
 									keyUp="toNextControl(event,billDateFrom)"/>
 						<mx:DateField id="billDateFrom"
 									  keyUp="toNextControl(event,billDateTo)"
-									  width="43%"
+									  width="120"
 									  enabled="{isBillDate.selected}"
 									  formatString="YYYY-MM-DD"
 									  enterFrame="{billDateFrom.selectedDate==null?billDateFrom.selectedDate=new Date():billDateFrom.selectedDate}"
@@ -79,7 +73,7 @@
 						<mx:FormItem label="-"
 									 fontSize="14"
 									 labelWidth="10"
-									 width="50%"
+									 width="120"
 									 horizontalGap="0">
 							<mx:DateField id="billDateTo"
 										  width="100%"
@@ -97,10 +91,6 @@
 								 indicatorGap="0">
 					</mx:FormItem>
 				</s:HGroup>
-
-				<s:HGroup width="100%"
-						  verticalAlign="middle">
-				</s:HGroup>
 				<s:HGroup width="100%"
 						  verticalAlign="middle">
 					<s:Label text="当前状态"
@@ -110,10 +100,10 @@
 									selectedIndex="0"
 									height="25"
 									dataProvider="{new ArrayCollection([
-									{currentStatus:'0',currentStatusName:'新建状态'},
-									{currentStatus:'2',currentStatusName:'提交'},
-									{currentStatus:'3,4',currentStatusName:'审批中'}])}"
-									width="100%"
+									{currentStatus:'0',currentStatusName:'未提交(0)'},
+									{currentStatus:'2',currentStatusName:'提交，未确认(2)'},
+									{currentStatus:'3,4',currentStatusName:'确认，审批中(3,4)'}])}"
+									width="270"
 									keyUp="toNextControl(event,btQuery)">
 					</s:DropDownList>
 				</s:HGroup>
