@@ -4,7 +4,7 @@
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
 			   xmlns:controls="cn.superion.base.components.controls.*"
 			   width="418"
-			   height="226"
+			   height="234"
 			   backgroundColor="0xE2E8E8"
 			   title="特殊物资申请查询"
 			   close="returnHandler()">
