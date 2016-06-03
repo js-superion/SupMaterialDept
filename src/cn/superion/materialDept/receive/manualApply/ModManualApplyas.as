@@ -561,6 +561,13 @@ private function validateMaster():Boolean
 			return state=false;
 		}
 		
+		if (lstBloodRdsDetail[i].detailRemark =='')
+		{
+			Alert.show("第" + (i + 1) + "条备注为空", "提示");
+			gridDetail.selectedIndex=i;
+			return state=false;
+		}
+		
 //		if (lstBloodRdsDetail[i].materialSpec =='')
 //		{
 //			Alert.show("第" + (i + 1) + "条物品规格不能为空", "提示");
