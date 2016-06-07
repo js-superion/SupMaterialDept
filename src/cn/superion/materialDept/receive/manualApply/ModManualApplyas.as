@@ -551,6 +551,12 @@ private function validateMaster():Boolean
 		Alert.show("请输入部门", "提示");
 		return state=false;
 	}
+	if (remark.text == '')
+	{
+		Alert.show("请输入申请原因", "提示");
+		return state=false;
+	}
+	
 	var lstBloodRdsDetail:ArrayCollection=gridDetail.dataProvider as ArrayCollection;
 	for (var i:int=0; i <= lstBloodRdsDetail.length - 1; i++)
 	{
@@ -561,12 +567,12 @@ private function validateMaster():Boolean
 			return state=false;
 		}
 		
-		if (lstBloodRdsDetail[i].detailRemark =='')
+/*		if (lstBloodRdsDetail[i].detailRemark =='')
 		{
 			Alert.show("第" + (i + 1) + "条备注为空", "提示");
 			gridDetail.selectedIndex=i;
 			return state=false;
-		}
+		}*/
 		
 //		if (lstBloodRdsDetail[i].materialSpec =='')
 //		{

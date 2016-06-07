@@ -85,7 +85,7 @@
 					<s:HGroup id="three"
 							  width="100%"
 							  verticalAlign="middle">
-						<s:Label text="备    注"
+						<s:Label text="申请原因"
 								 width="56"/>
 						<s:TextInput id="remark"
 									 width="100%"
@@ -141,9 +141,8 @@
 											   width="150"
 											   rendererIsEditor="true"
 											   itemRenderer="cn.superion.materialDept.receive.manualApply.view.IRUrgent"
-											   editable="true"/>
-						
-							<mx:DataGridColumn headerText="备注"
+											   editable="true"/>						
+							<mx:DataGridColumn headerText="明细备注"
 											   dataField="detailRemark"
 											   editable="true"
 											   width="220"/>
