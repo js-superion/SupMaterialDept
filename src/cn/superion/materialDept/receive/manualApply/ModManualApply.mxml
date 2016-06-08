@@ -55,13 +55,13 @@
 					<s:HGroup width="100%"
 							  id="one"
 							  verticalAlign="middle">
-						<s:Label text="仓库"/>
+						<s:Label text="仓库" color="#0000FF"/>
 						<s:DropDownList id="storageCode"
 										labelField="storageName"
 										width="100"
 										change="storageCode_changeHandler(event)"
 										selectedIndex="0"/>
-						<s:Label text="领用科室"/>
+						<s:Label text="领用科室" color="#0000FF"/>
 						<s:ComboBox width="130"
 									id="deptCode"
 									labelField="deptName"
@@ -86,6 +86,7 @@
 							  width="100%"
 							  verticalAlign="middle">
 						<s:Label text="申请原因"
+								 color="#0000FF"
 								 width="56"/>
 						<s:TextInput id="remark"
 									 width="100%"
