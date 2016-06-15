@@ -567,12 +567,12 @@ private function validateMaster():Boolean
 			return state=false;
 		}
 		
-/*		if (lstBloodRdsDetail[i].detailRemark =='')
+		if (lstBloodRdsDetail[i].detailRemark ==''||lstBloodRdsDetail[i].detailRemark ==null)
 		{
-			Alert.show("第" + (i + 1) + "条备注为空", "提示");
+			Alert.show("第" + (i + 1) + "条备注为空，请输入具体说明或相关注意事项", "提示");
 			gridDetail.selectedIndex=i;
 			return state=false;
-		}*/
+		}
 		
 //		if (lstBloodRdsDetail[i].materialSpec =='')
 //		{
